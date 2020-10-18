@@ -6,7 +6,11 @@
 
     <groupId>ru.gb</groupId>
     <artifactId>personal-cloud-storage</artifactId>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
-
+    <modules>
+        <module>server</module>
+        <module>client</module>
+    </modules>
 
 </project>
