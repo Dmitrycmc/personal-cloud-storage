@@ -1,2 +1,10 @@
-#===== Idea ignore ===========
+#===== Idea ===========
 /.idea/
+
+#===== Storages ===========
+/server_storage/
+/client_storage/
+
+#===== Build ===========
+**/target/
+
