@@ -1,10 +1,15 @@
 package ru.gb.client;
 
+import java.io.IOException;
+import java.nio.file.Paths;
+
 public class Client {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Network network = new Network("localhost", 8189);
         network.start();
-        network.send("abc".getBytes());
+
+        network.send(Paths.get("client_storage/1.txt"));
+        network.send(Paths.get("client_storage/2.txt"));
         network.waitForAnswer();
     }
 }
