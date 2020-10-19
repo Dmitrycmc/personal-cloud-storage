@@ -8,8 +8,10 @@ public class Client {
         Network network = new Network("localhost", 8189);
         network.start();
 
-        network.send(Paths.get("client_storage/1.txt"));
-        network.send(Paths.get("client_storage/2.txt"));
+//        network.send(Paths.get("client_storage/2.txt"));
+//        network.send(Paths.get("client_storage/1.txt"));
+//        network.send(Paths.get("client_storage/1.bmp"));
+        network.send(Paths.get("client_storage/1.jpg"));
         network.waitForAnswer();
     }
 }
