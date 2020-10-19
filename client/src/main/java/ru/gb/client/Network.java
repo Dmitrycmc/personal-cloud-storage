@@ -1,12 +1,9 @@
 package ru.gb.client;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
-import java.nio.file.Files;
 
 class Network {
     private String domain;
@@ -22,9 +19,8 @@ class Network {
 
     private void send(byte[] arr) {
         try {
-            for (byte b: arr) {
+            for (byte b : arr) {
                 out.writeByte(b);
-                System.out.println("Отпарвлен байт: " + b);
             }
         } catch (IOException e) {
             System.out.println("Соединение разорвано");
@@ -32,9 +28,25 @@ class Network {
         }
     }
 
-    private void send(int n) {
-        ByteBuffer b = ByteBuffer.allocate(4);
-        b.putInt(n);
+    private void send(FileInputStream fis) throws IOException {
+        int batch = (int)Math.ceil((float)fis.getChannel().size() / 100);
+        int i = 0;
+        int progress = 0;
+        int b;
+        while (true){
+            b = fis.read();
+            if (b == -1) break;
+            if (batch > 0 && i % batch == 0) {
+                System.out.println(progress++ + "%");
+            }
+            out.writeByte(b);
+            i++;
+        }
+    }
+
+    private void send(long n) {
+        ByteBuffer b = ByteBuffer.allocate(8);
+        b.putLong(n);
         send(b.array());
     }
 
@@ -45,10 +57,10 @@ class Network {
 
     void send(Path path) throws IOException {
         String filename = path.getFileName().toString();
-        byte[] data = Files.readAllBytes(path);
+        FileInputStream fis = new FileInputStream(path.toString());
         send(filename);
-        send(data.length);
-        send(data);
+        send(fis.getChannel().size());
+        send(fis);
     }
 
     String waitForAnswer() {
