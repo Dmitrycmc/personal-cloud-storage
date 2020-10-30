@@ -29,18 +29,11 @@ class Network {
     }
 
     private void send(FileInputStream fis) throws IOException {
-        int batch = (int)Math.ceil((float)fis.getChannel().size() / 100);
-        int i = 0;
-        int progress = 0;
         int b;
         while (true){
             b = fis.read();
             if (b == -1) break;
-            if (batch > 0 && i % batch == 0) {
-                System.out.println(progress++ + "%");
-            }
             out.writeByte(b);
-            i++;
         }
     }
 
@@ -51,16 +44,17 @@ class Network {
     }
 
     private void send(String s) {
-        send(s.length());
         send(s.getBytes());
     }
 
     void send(Path path) throws IOException {
         String filename = path.getFileName().toString();
         FileInputStream fis = new FileInputStream(path.toString());
+        send(filename.length());
         send(filename);
         send(fis.getChannel().size());
         send(fis);
+        fis.close();
     }
 
     String waitForAnswer() {
