@@ -10,7 +10,7 @@ class Network {
     private int port;
 
     private DataInputStream in;
-    private DataOutputStream out;
+    public DataOutputStream out;
 
     Network(String domain, int port) {
         this.domain = domain;
@@ -62,16 +62,16 @@ class Network {
         }
     }
 
-    String waitForAnswer() {
-        String message = "";
+    byte waitForAnswer() {
+        byte b = 0;
         try {
-            message = in.readUTF();
-            System.out.println("Получено сообщение: " + message);
+            b = in.readByte();
+            System.out.println("Получено сообщение: " + b);
         } catch (Exception e) {
             System.out.println("Соединение разорвано");
             System.exit(0);
         }
-        return message;
+        return b;
     }
 
     void start() {

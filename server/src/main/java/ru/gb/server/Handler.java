@@ -22,6 +22,16 @@ public class Handler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        ByteBuf in = (ByteBuf) msg;
+        while (in.isReadable()) {
+            byte b = in.readByte();
+            System.out.println(b);
+            ctx.writeAndFlush(b); // байт отправляется на клиент
+        }
+    }
+/*
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         try {
             ByteBuf in = (ByteBuf) msg;
             while (in.isReadable()) {
@@ -78,7 +88,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
             ReferenceCountUtil.release(msg);
         }
     }
-
+*/
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
