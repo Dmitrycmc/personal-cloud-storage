@@ -17,7 +17,7 @@ class Network {
         this.port = port;
     }
 
-    private void send(byte[] arr) {
+    private void sendBytesArray(byte[] arr) {
         try {
             for (byte b : arr) {
                 out.writeByte(b);
@@ -26,6 +26,16 @@ class Network {
             System.out.println("Соединение разорвано");
             System.exit(0);
         }
+    }
+
+    private void send(long n) {
+        ByteBuffer b = ByteBuffer.allocate(8);
+        b.putLong(n);
+        sendBytesArray(b.array());
+    }
+
+    private void send(String s) {
+        sendBytesArray(s.getBytes());
     }
 
     private void send(FileInputStream fis) throws IOException {
@@ -37,24 +47,19 @@ class Network {
         }
     }
 
-    private void send(long n) {
-        ByteBuffer b = ByteBuffer.allocate(8);
-        b.putLong(n);
-        send(b.array());
-    }
-
-    private void send(String s) {
-        send(s.getBytes());
-    }
-
-    void send(Path path) throws IOException {
+    void send(Path path) {
         String filename = path.getFileName().toString();
-        FileInputStream fis = new FileInputStream(path.toString());
-        send(filename.length());
-        send(filename);
-        send(fis.getChannel().size());
-        send(fis);
-        fis.close();
+        try {
+            FileInputStream fis = new FileInputStream(path.toString());
+            send(filename.length());
+            send(filename);
+            send(fis.getChannel().size());
+            send(fis);
+            fis.close();
+            System.out.println("Успешно передан файл " + filename);
+        } catch (IOException e) {
+            System.out.println("Ошибка передачи файла " + filename);
+        }
     }
 
     String waitForAnswer() {

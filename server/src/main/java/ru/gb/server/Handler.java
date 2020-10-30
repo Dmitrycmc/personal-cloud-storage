@@ -36,7 +36,6 @@ public class Handler extends ChannelInboundHandlerAdapter {
                             bytesCounter = buff.getLong();
                             state = State.Filename;
                             buff = ByteBuffer.allocate(8);
-                            System.out.println("FilenameLength = " + bytesCounter);
                         }
                         break;
                     case Filename:
@@ -44,7 +43,6 @@ public class Handler extends ChannelInboundHandlerAdapter {
                         if (bytesCounter == 0) {
                             bytesCounter = 8;
                             state = State.DataLength;
-                            System.out.println("Filename = " + filename);
                         }
                         break;
                     case DataLength:
@@ -54,7 +52,6 @@ public class Handler extends ChannelInboundHandlerAdapter {
                             bytesCounter = buff.getLong();
                             state = State.Data;
                             buff = ByteBuffer.allocate(8);
-                            System.out.println("DataLength = " + bytesCounter);
                             try {
                                 fos = new FileOutputStream("server_storage/" + filename);
                             } catch (IOException e) {
@@ -69,7 +66,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
                                 bytesCounter = 8;
                                 state = State.FilenameLength;
                                 fos.close();
-                                System.out.println("Data written");
+                                System.out.println("File received " + filename);
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
