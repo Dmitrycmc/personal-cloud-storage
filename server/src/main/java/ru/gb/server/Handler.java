@@ -16,56 +16,63 @@ public class Handler extends ChannelInboundHandlerAdapter {
 
     private State state = State.FilenameLength;
     private ByteBuffer buff = ByteBuffer.allocate(8);
-    private long c = 8;
+    private long bytesCounter = 8;
     private String filename;
+    private FileOutputStream fos;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         try {
             ByteBuf in = (ByteBuf) msg;
             while (in.isReadable()) {
-                c--;
+                bytesCounter--;
                 byte b = in.readByte();
                 switch (state) {
                     case FilenameLength:
                         buff.put(b);
-                        if (c == 0) {
+                        if (bytesCounter == 0) {
                             filename = "";
                             buff.flip();
-                            c = buff.getLong();
+                            bytesCounter = buff.getLong();
                             state = State.Filename;
                             buff = ByteBuffer.allocate(8);
-                            System.out.println("FilenameLength = " + c);
+                            System.out.println("FilenameLength = " + bytesCounter);
                         }
                         break;
                     case Filename:
                         filename += (char) b;
-                        if (c == 0) {
-                            c = 8;
+                        if (bytesCounter == 0) {
+                            bytesCounter = 8;
                             state = State.DataLength;
                             System.out.println("Filename = " + filename);
                         }
                         break;
                     case DataLength:
                         buff.put(b);
-                        if (c == 0) {
+                        if (bytesCounter == 0) {
                             buff.flip();
-                            c = buff.getLong();
+                            bytesCounter = buff.getLong();
                             state = State.Data;
                             buff = ByteBuffer.allocate(8);
-                            System.out.println("DataLength = " + c);
+                            System.out.println("DataLength = " + bytesCounter);
+                            try {
+                                fos = new FileOutputStream("server_storage/" + filename);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                         break;
                     case Data:
-                        try (FileOutputStream fos = new FileOutputStream("server_storage/" + filename, true)) {
+                        try {
                             fos.write(b);
+                            if (bytesCounter == 0) {
+                                bytesCounter = 8;
+                                state = State.FilenameLength;
+                                fos.close();
+                                System.out.println("Data written");
+                            }
                         } catch (IOException e) {
                             e.printStackTrace();
-                        }
-                        if (c == 0) {
-                            c = 8;
-                            state = State.FilenameLength;
-                            System.out.println("Data written");
                         }
                         break;
                 }
