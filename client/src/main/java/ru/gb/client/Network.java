@@ -65,7 +65,6 @@ class Network {
         byte b = 0;
         try {
             b = in.readByte();
-            System.out.println("Получено сообщение: " + b);
         } catch (Exception e) {
             System.out.println("Соединение разорвано");
             System.exit(0);

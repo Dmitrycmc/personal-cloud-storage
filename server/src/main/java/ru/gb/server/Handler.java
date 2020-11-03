@@ -8,6 +8,7 @@ import ru.gb.common.Commands;
 import ru.gb.common.FileReceiver;
 import ru.gb.common.StringReceiver;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -80,7 +81,6 @@ public class Handler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         this.ctx = ctx;
-
         try {
             ByteBuf in = (ByteBuf) msg;
             while (in.isReadable()) {
@@ -105,8 +105,24 @@ public class Handler extends ChannelInboundHandlerAdapter {
                         case GET_FILES:
                             stringReceiver.put(b);
                             if (stringReceiver.received()) {
-                                idle = true;
                                 send(Paths.get("server_storage/" + stringReceiver));
+                                idle = true;
+                            }
+                            break;
+                        case GET_FILES_LIST:
+                            stringReceiver.put(b);
+                            if (stringReceiver.received()) {
+                                StringBuilder sb = new StringBuilder();
+                                File folder = new File("server_storage/"+stringReceiver);
+                                for (final File fileEntry : folder.listFiles()) {
+                                    if (fileEntry.isDirectory()) {
+                                        sb.append(fileEntry.getName()).append("/\n");
+                                    } else {
+                                        sb.append(fileEntry.getName()).append('\n');
+                                    }
+                                }
+                                send(sb.toString());
+                                idle = true;
                             }
                             break;
                         default:

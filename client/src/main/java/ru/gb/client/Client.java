@@ -2,6 +2,7 @@ package ru.gb.client;
 
 import ru.gb.common.Commands;
 import ru.gb.common.FileReceiver;
+import ru.gb.common.StringReceiver;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -51,6 +52,15 @@ public class Client {
                 do {
                     fr.put(network.waitForAnswer());
                 } while (!fr.fileIsReceived());
+                break;
+            case GET_FILES_LIST:
+                network.send(Commands.GET_FILES_LIST.code);
+                network.send(args.length > 1 ? args[1] : " ");
+                StringReceiver sr = new StringReceiver();
+                do {
+                    sr.put(network.waitForAnswer());
+                } while (!sr.received());
+                System.out.println(sr);
                 break;
             default:
         }
