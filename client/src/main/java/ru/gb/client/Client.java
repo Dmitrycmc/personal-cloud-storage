@@ -1,9 +1,9 @@
 package ru.gb.client;
 
 import ru.gb.common.Commands;
+import ru.gb.common.FileReceiver;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Optional;
@@ -27,7 +27,7 @@ public class Client {
         System.out.println();
     }
 
-    private static void processCommand(String line) {
+    private static void processCommand(String line) throws IOException {
         String[] args = line.trim().replaceAll("( )+", " ").split(" ");
         String command = args[0];
 
@@ -41,11 +41,17 @@ public class Client {
                 printHelp();
                 break;
             case POST_FILES:
-                for (int i = 1; i < args.length; i++) {
-                    network.send(Paths.get("client_storage/" + args[i]));
-                }
+                network.send(Commands.POST_FILES.code);
+                network.send(Paths.get("client_storage/" + args[1]));
                 break;
-
+            case GET_FILES:
+                network.send(Commands.GET_FILES.code);
+                network.send(args[1]);
+                FileReceiver fr = new FileReceiver("client_storage");
+                do {
+                    fr.put(network.waitForAnswer());
+                } while (!fr.fileIsReceived());
+                break;
             default:
         }
     }
@@ -68,7 +74,11 @@ public class Client {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.println("Enter command:");
-            processCommand(scanner.nextLine());
+            try {
+                processCommand(scanner.nextLine());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

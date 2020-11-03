@@ -17,24 +17,24 @@ class Network {
         this.port = port;
     }
 
-    private void sendBytesArray(byte[] arr) {
-        try {
-            for (byte b : arr) {
-                out.writeByte(b);
-            }
-        } catch (IOException e) {
-            System.out.println("Соединение разорвано");
-            System.exit(0);
+    private void sendBytesArray(byte[] arr) throws IOException {
+        for (byte b : arr) {
+            out.writeByte(b);
         }
     }
 
-    private void send(long n) {
+    private void send(long n) throws IOException {
         ByteBuffer b = ByteBuffer.allocate(8);
         b.putLong(n);
         sendBytesArray(b.array());
     }
 
-    private void send(String s) {
+    void send(byte b) throws IOException {
+        out.writeByte(b);
+    }
+
+    void send(String s) throws IOException {
+        send((byte)s.length());
         sendBytesArray(s.getBytes());
     }
 
@@ -51,7 +51,6 @@ class Network {
         String filename = path.getFileName().toString();
         try {
             FileInputStream fis = new FileInputStream(path.toString());
-            send(filename.length());
             send(filename);
             send(fis.getChannel().size());
             send(fis);

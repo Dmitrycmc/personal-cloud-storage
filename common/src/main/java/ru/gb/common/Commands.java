@@ -15,16 +15,16 @@ public enum Commands {
     PATCH_FILES(42, "[{oldPath, newPath}]"), // {status}
     DELETE_FILES(43, "[path]"); // {status}
 
-    public final int code;
+    public final byte code;
     public final String params;
 
     Commands(int code, String params) {
-        this.code = code;
+        this.code = (byte)code;
         this.params = params;
     }
 
     Commands(int code) {
-        this.code = code;
+        this.code = (byte)code;
         this.params = "";
     }
 }

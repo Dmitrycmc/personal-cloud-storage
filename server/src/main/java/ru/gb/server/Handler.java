@@ -4,26 +4,25 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
+import ru.gb.common.Commands;
+import ru.gb.common.FileReceiver;
+import ru.gb.common.StringReceiver;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Optional;
 
 public class Handler extends ChannelInboundHandlerAdapter {
-    private enum State {
-        FilenameLength, Filename, DataLength, Data
-    }
+    private Commands command;
+    private boolean idle = true;
 
     private ChannelHandlerContext ctx;
-
-    private State state = State.FilenameLength;
-    private ByteBuffer buff = ByteBuffer.allocate(8);
-    private long bytesCounter = 8;
-    private String filename;
-    private FileOutputStream fos;
+    private FileReceiver fileReceiver = new FileReceiver("server_storage");
+    private StringReceiver stringReceiver = new StringReceiver();
 
     private void sendBytesArray(byte[] arr) {
         ByteBuf out;
@@ -40,7 +39,14 @@ public class Handler extends ChannelInboundHandlerAdapter {
         sendBytesArray(b.array());
     }
 
+    private void send(byte b) {
+        ByteBuf out = ctx.alloc().buffer(1);
+        out.writeByte(b);
+        ctx.writeAndFlush(out);
+    }
+
     private void send(String s) {
+        send((byte)s.length());
         sendBytesArray(s.getBytes());
     }
 
@@ -61,7 +67,6 @@ public class Handler extends ChannelInboundHandlerAdapter {
         String filename = path.getFileName().toString();
         try {
             FileInputStream fis = new FileInputStream(path.toString());
-            send(filename.length());
             send(filename);
             send(fis.getChannel().size());
             send(fis);
@@ -76,59 +81,39 @@ public class Handler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         this.ctx = ctx;
 
-        ///send(Paths.get("server_storage/1.txt"));
-
         try {
             ByteBuf in = (ByteBuf) msg;
             while (in.isReadable()) {
-                bytesCounter--;
                 byte b = in.readByte();
-                switch (state) {
-                    case FilenameLength:
-                        buff.put(b);
-                        if (bytesCounter == 0) {
-                            filename = "";
-                            buff.flip();
-                            bytesCounter = buff.getLong();
-                            state = State.Filename;
-                            buff = ByteBuffer.allocate(8);
-                        }
-                        break;
-                    case Filename:
-                        filename += (char) b;
-                        if (bytesCounter == 0) {
-                            bytesCounter = 8;
-                            state = State.DataLength;
-                        }
-                        break;
-                    case DataLength:
-                        buff.put(b);
-                        if (bytesCounter == 0) {
-                            buff.flip();
-                            bytesCounter = buff.getLong();
-                            state = State.Data;
-                            buff = ByteBuffer.allocate(8);
-                            try {
-                                fos = new FileOutputStream("server_storage/" + filename);
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                if (idle) {
+                    Optional<Commands> matchedCommand = Arrays.stream(Commands.class.getEnumConstants()).filter(c -> c.code == b).findAny();
+                    if (!matchedCommand.isPresent()) {
+                        System.out.println("Wrong command");
+                        return;
+                    }
+                    idle = false;
+                    command = matchedCommand.get();
+                    System.out.println(command);
+                } else {
+                    switch (command) {
+                        case POST_FILES:
+                            fileReceiver.put(b);
+                            if (fileReceiver.fileIsReceived()) {
+                                idle = true;
                             }
-                        }
-                        break;
-                    case Data:
-                        try {
-                            fos.write(b);
-                            if (bytesCounter == 0) {
-                                bytesCounter = 8;
-                                state = State.FilenameLength;
-                                fos.close();
-                                System.out.println("File received " + filename);
+                            break;
+                        case GET_FILES:
+                            stringReceiver.put(b);
+                            if (stringReceiver.received()) {
+                                idle = true;
+                                send(Paths.get("server_storage/" + stringReceiver));
                             }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        break;
+                            break;
+                        default:
+
+                    }
                 }
+
             }
         } finally {
             ReferenceCountUtil.release(msg);
