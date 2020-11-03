@@ -2,9 +2,11 @@ package ru.gb.client;
 
 import ru.gb.common.Commands;
 import ru.gb.common.FileReceiver;
+import ru.gb.common.Message;
 import ru.gb.common.StringReceiver;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Optional;
@@ -42,8 +44,9 @@ public class Client {
                 printHelp();
                 break;
             case POST_FILES:
-                network.send(Commands.POST_FILES.code);
-                network.send(Paths.get("client_storage/" + args[1]));
+                Message msg = new Message(args[1], Files.readAllBytes(Paths.get("client_storage/" + args[1])));
+                System.out.println(msg);
+                network.sendObject(msg);
                 break;
             case GET_FILES:
                 network.send(Commands.GET_FILES.code);

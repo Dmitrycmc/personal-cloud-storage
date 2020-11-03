@@ -1,5 +1,8 @@
 package ru.gb.client;
 
+import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
+import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -9,8 +12,8 @@ class Network {
     private String domain;
     private int port;
 
-    private DataInputStream in;
-    private DataOutputStream out;
+    private ObjectDecoderInputStream in;
+    private ObjectEncoderOutputStream out;
 
     Network(String domain, int port) {
         this.domain = domain;
@@ -21,6 +24,10 @@ class Network {
         for (byte b : arr) {
             out.writeByte(b);
         }
+    }
+
+    public void sendObject(Object obj) throws IOException {
+        out.writeObject(obj);
     }
 
     private void send(long n) throws IOException {
@@ -76,8 +83,8 @@ class Network {
         try {
             Socket socket = new Socket(domain, port);
             System.out.println("Соединение установлено!");
-            in = new DataInputStream(socket.getInputStream());
-            out = new DataOutputStream(socket.getOutputStream());
+            out = new ObjectEncoderOutputStream(socket.getOutputStream());
+            in = new ObjectDecoderInputStream(socket.getInputStream(), 50 * 1024 * 1024);
         } catch (IOException e) {
             System.out.println("Не удалось подключиться!");
             System.exit(0);

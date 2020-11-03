@@ -6,6 +6,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import ru.gb.common.Commands;
 import ru.gb.common.FileReceiver;
+import ru.gb.common.Message;
 import ru.gb.common.StringReceiver;
 
 import java.io.File;
@@ -82,6 +83,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         this.ctx = ctx;
+
         try {
             ByteBuf in = (ByteBuf) msg;
             while (in.isReadable()) {
