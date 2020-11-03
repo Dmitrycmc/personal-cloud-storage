@@ -2,12 +2,13 @@ package ru.gb.client;
 
 import ru.gb.common.Commands;
 import ru.gb.common.FileReceiver;
-import ru.gb.common.Message;
+import ru.gb.common.Status;
 import ru.gb.common.StringReceiver;
+import ru.gb.common.messages.GetFileRequest;
+import ru.gb.common.messages.GetFileResponse;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -44,24 +45,25 @@ public class Client {
                 printHelp();
                 break;
             case POST_FILES:
-                Message msg = new Message(args[1], Files.readAllBytes(Paths.get("client_storage/" + args[1])));
-                System.out.println(msg);
-                network.sendObject(msg);
+                network.sendObject(new GetFileRequest(args[1]));
                 break;
             case GET_FILES:
-                network.send(Commands.GET_FILES.code);
-                network.send(args[1]);
-                FileReceiver fr = new FileReceiver("client_storage");
-                do {
-                    fr.put(network.waitForAnswer());
-                } while (!fr.fileIsReceived());
+                network.sendObject(new GetFileRequest(args[1]));
+                GetFileResponse response = (GetFileResponse) network.waitForAnswer();
+                if (response.getStatus() == Status.Failure) {
+                    System.out.println("Ошибка на сервере");
+                } else {
+                    FileOutputStream fos = new FileOutputStream("client_storage/" + response.getFileName());
+                    fos.write(response.getData());
+                    fos.close();
+                }
                 break;
             case GET_FILES_LIST:
                 network.send(Commands.GET_FILES_LIST.code);
                 network.send(args.length > 1 ? args[1] : "/");
                 StringReceiver sr = new StringReceiver();
                 do {
-                    sr.put(network.waitForAnswer());
+                    //sr.put(network.waitForAnswer());
                 } while (!sr.received());
                 System.out.println(sr);
                 break;

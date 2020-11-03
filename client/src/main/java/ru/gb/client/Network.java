@@ -68,10 +68,10 @@ class Network {
         }
     }
 
-    byte waitForAnswer() {
-        byte b = 0;
+    Object waitForAnswer() {
+        Object b = 0;
         try {
-            b = in.readByte();
+            b = in.readObject();
         } catch (Exception e) {
             System.out.println("Соединение разорвано");
             System.exit(0);
