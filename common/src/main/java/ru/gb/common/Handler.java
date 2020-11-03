@@ -1,4 +1,4 @@
-package ru.gb.server;
+package ru.gb.common;
 
 
 /*

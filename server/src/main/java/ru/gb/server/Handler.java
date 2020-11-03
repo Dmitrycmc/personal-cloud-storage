@@ -76,7 +76,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         this.ctx = ctx;
 
-        send(Paths.get("server_storage/1.txt"));
+        ///send(Paths.get("server_storage/1.txt"));
 
         try {
             ByteBuf in = (ByteBuf) msg;

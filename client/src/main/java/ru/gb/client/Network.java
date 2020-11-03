@@ -10,7 +10,7 @@ class Network {
     private int port;
 
     private DataInputStream in;
-    public DataOutputStream out;
+    private DataOutputStream out;
 
     Network(String domain, int port) {
         this.domain = domain;
