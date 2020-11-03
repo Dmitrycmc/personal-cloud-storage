@@ -1,17 +1,7 @@
 package ru.gb.server;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.util.ReferenceCountUtil;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
+/*
 public class Handler extends ChannelInboundHandlerAdapter {
     private enum State {
         FilenameLength, Filename, DataLength, Data
@@ -76,8 +66,6 @@ public class Handler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         this.ctx = ctx;
 
-        send(Paths.get("server_storage/1.txt"));
-
         try {
             ByteBuf in = (ByteBuf) msg;
             while (in.isReadable()) {
@@ -141,3 +129,4 @@ public class Handler extends ChannelInboundHandlerAdapter {
         ctx.close();
     }
 }
+*/
