@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -122,6 +123,17 @@ public class Handler extends ChannelInboundHandlerAdapter {
                                     }
                                 }
                                 send(sb.toString());
+                                idle = true;
+                            }
+                            break;
+                        case DELETE_FILES:
+                            stringReceiver.put(b);
+                            if (stringReceiver.received()) {
+                                try {
+                                    Files.delete(Paths.get("server_storage/" + stringReceiver));
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
                                 idle = true;
                             }
                             break;

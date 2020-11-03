@@ -55,12 +55,16 @@ public class Client {
                 break;
             case GET_FILES_LIST:
                 network.send(Commands.GET_FILES_LIST.code);
-                network.send(args.length > 1 ? args[1] : " ");
+                network.send(args.length > 1 ? args[1] : "/");
                 StringReceiver sr = new StringReceiver();
                 do {
                     sr.put(network.waitForAnswer());
                 } while (!sr.received());
                 System.out.println(sr);
+                break;
+            case DELETE_FILES:
+                network.send(Commands.DELETE_FILES.code);
+                network.send(args[1]);
                 break;
             default:
         }

@@ -2,6 +2,7 @@ package ru.gb.common;
 
 public enum Commands {
     HELP(0),
+
     LOGIN(10, "login, password"), // {status, token}
 
     POST_USERS(20, "login, password"), // {status, token}
