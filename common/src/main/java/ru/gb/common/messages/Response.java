@@ -18,7 +18,10 @@ public class Response implements Serializable {
         return status;
     }
 
+    @Override
     public String toString() {
-        return "Status: " + status;
+        return "Response{" +
+                "status=" + status +
+                '}';
     }
 }

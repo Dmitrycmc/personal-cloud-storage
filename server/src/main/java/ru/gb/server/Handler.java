@@ -2,9 +2,16 @@ package ru.gb.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import ru.gb.common.Status;
 import ru.gb.common.messages.*;
+import ru.gb.common.messages.Package;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class Handler extends ChannelInboundHandlerAdapter {
+    FileOutputStream fos;
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object request) {
         System.out.println(request);
@@ -14,7 +21,23 @@ public class Handler extends ChannelInboundHandlerAdapter {
             response = new GetFileResponse("server_storage/" + ((GetFileRequest) request).getPath());
         }
         if (request instanceof PostFileRequest) {
-            response = new PostFileResponse("server_storage/" + ((PostFileRequest) request).getFileName(), ((PostFileRequest) request).getData());
+            try {
+                fos = new FileOutputStream("server_storage/" + ((PostFileRequest) request).getFileName(), true);
+                response = new Response(Status.Success);
+            } catch (IOException e) {
+                response = new Response(Status.Failure);
+            }
+        }
+        if (request instanceof Package) {
+            try {
+                fos.write(((Package) request).getData());
+                if (((Package) request).isTerminate()) {
+                    fos.close();
+                }
+                response = new Response(Status.Success);
+            } catch (IOException e) {
+                response = new Response(Status.Failure);
+            }
         }
         if (request instanceof GetFilesListRequest) {
             response = new GetFilesListResponse("server_storage/" + ((GetFilesListRequest) request).getPath());
@@ -23,7 +46,6 @@ public class Handler extends ChannelInboundHandlerAdapter {
             response = new DeleteFileResponse("server_storage/" + ((DeleteFileRequest) request).getPath());
         }
 
-        System.out.println(response);
         ctx.writeAndFlush(response);
     }
 

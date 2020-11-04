@@ -11,7 +11,10 @@ public class DeleteFileRequest extends Request {
         return path;
     }
 
+    @Override
     public String toString() {
-        return "Path: " + path;
+        return "DeleteFileRequest{" +
+                "path='" + path + '\'' +
+                '}';
     }
 }

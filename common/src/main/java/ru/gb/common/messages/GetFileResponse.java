@@ -2,38 +2,35 @@ package ru.gb.common.messages;
 
 import ru.gb.common.Status;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 public class GetFileResponse extends Response{
-    private byte[] data;
     private String fileName;
 
     public GetFileResponse(String string) {
         Path path = Paths.get(string);
-        try {
+        File f = new File(string);
+        if (f.exists() && !f.isDirectory()) {
             this.status = Status.Success;
             this.fileName = path.getFileName().toString();
-            this.data = Files.readAllBytes(path);
-        } catch (IOException e) {
+        } else {
             this.status = Status.Failure;
         }
-    }
-
-    public byte[] getData() {
-        return data;
     }
 
     public String getFileName() {
         return fileName;
     }
 
+    @Override
     public String toString() {
-        return super.toString() + "\n" +
-                "Filename: " + fileName + "\n" +
-                "Data: " + Arrays.toString(data);
+        return "GetFileResponse{" +
+                "fileName='" + fileName + '\'' +
+                ", status=" + status +
+                '}';
     }
 }

@@ -4,9 +4,14 @@ import ru.gb.common.Commands;
 import ru.gb.common.Constants;
 import ru.gb.common.Status;
 import ru.gb.common.messages.*;
+import ru.gb.common.messages.Package;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -45,11 +50,33 @@ public class Client {
             case POST_FILES: {
                 network.sendObject(new PostFileRequest("client_storage/" + args[1]));
                 Response response = (Response) network.waitForAnswer();
-                System.out.println(response);
                 if (response.getStatus() == Status.Failure) {
                     System.out.println("Server error");
                 } else {
-                    System.out.println("Uploaded file: " + args[1]);
+                    System.out.println("Package sent: " + args[1]);
+                }
+                File f = new File("client_storage/" + args[1]);
+                long fileSize = f.length();
+                long readBytesCounter = 0;
+                FileInputStream fis = new FileInputStream(f);
+                while (true) {
+                    readBytesCounter += Constants.maxPackageSize;
+                    if (readBytesCounter >= fileSize) {
+                        network.sendObject(new Package(fis.readNBytes(Constants.maxPackageSize), true));
+                        if (response.getStatus() == Status.Failure) {
+                            System.out.println("Server error");
+                        } else {
+                            System.out.println("Package sent: " + args[1]);
+                        }
+                        break;
+                    } else {
+                        network.sendObject(new Package(fis.readNBytes(Constants.maxPackageSize), false));
+                        if (response.getStatus() == Status.Failure) {
+                            System.out.println("Server error");
+                        } else {
+                            System.out.println("Package sent: " + args[1]);
+                        }
+                    }
                 }
                 break;
             }
@@ -61,7 +88,7 @@ public class Client {
                     System.out.println("Server error");
                 } else {
                     FileOutputStream fos = new FileOutputStream("client_storage/" + response.getFileName());
-                    fos.write(response.getData());
+                    //fos.write(response.getData());
                     fos.close();
                     System.out.println("File received: " + response.getFileName());
                 }

@@ -24,8 +24,11 @@ public class GetFilesListResponse extends Response{
         return filesList;
     }
 
+    @Override
     public String toString() {
-        return super.toString() + "\n" +
-                "FilesList: " + Arrays.toString(filesList);
+        return "GetFilesListResponse{" +
+                "filesList=" + Arrays.toString(filesList) +
+                ", status=" + status +
+                '}';
     }
 }

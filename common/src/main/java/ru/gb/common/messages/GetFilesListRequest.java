@@ -14,7 +14,10 @@ public class GetFilesListRequest extends Request {
         return path;
     }
 
+    @Override
     public String toString() {
-        return "Path: " + path;
+        return "GetFilesListRequest{" +
+                "path='" + path + '\'' +
+                '}';
     }
 }
