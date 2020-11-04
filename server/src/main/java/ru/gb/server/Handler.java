@@ -7,10 +7,7 @@ import ru.gb.common.Commands;
 import ru.gb.common.FileReceiver;
 import ru.gb.common.Status;
 import ru.gb.common.StringReceiver;
-import ru.gb.common.messages.GetFileRequest;
-import ru.gb.common.messages.GetFileResponse;
-import ru.gb.common.messages.PostFileRequest;
-import ru.gb.common.messages.Response;
+import ru.gb.common.messages.*;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -82,6 +79,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
+        System.out.println(msg);
         if (msg instanceof GetFileRequest) {
             ctx.writeAndFlush(new GetFileResponse("server_storage/" + ((GetFileRequest) msg).getPath()));
         }
@@ -95,6 +93,10 @@ public class Handler extends ChannelInboundHandlerAdapter {
                 ctx.writeAndFlush(new Response(Status.Failure));
             }
         }
+        if (msg instanceof GetFilesListRequest) {
+            ctx.writeAndFlush(new GetFilesListResponse("server_storage/" + ((GetFilesListRequest) msg).getPath()));
+        }
+
 //        this.ctx = ctx;
 //
 //        try {

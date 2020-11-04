@@ -3,10 +3,7 @@ package ru.gb.client;
 import ru.gb.common.Commands;
 import ru.gb.common.Status;
 import ru.gb.common.StringReceiver;
-import ru.gb.common.messages.GetFileRequest;
-import ru.gb.common.messages.GetFileResponse;
-import ru.gb.common.messages.PostFileRequest;
-import ru.gb.common.messages.Response;
+import ru.gb.common.messages.*;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,6 +11,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Client {
     static private Network network;
@@ -48,6 +46,7 @@ public class Client {
             case POST_FILES: {
                 network.sendObject(new PostFileRequest("client_storage/" + args[1]));
                 Response response = (Response) network.waitForAnswer();
+                System.out.println(response);
                 if (response.getStatus() == Status.Failure) {
                     System.out.println("Server error");
                 } else {
@@ -58,6 +57,7 @@ public class Client {
             case GET_FILES: {
                 network.sendObject(new GetFileRequest(args[1]));
                 GetFileResponse response = (GetFileResponse) network.waitForAnswer();
+                System.out.println(response);
                 if (response.getStatus() == Status.Failure) {
                     System.out.println("Server error");
                 } else {
@@ -69,13 +69,18 @@ public class Client {
                 break;
             }
             case GET_FILES_LIST:
-                network.send(Commands.GET_FILES_LIST.code);
-                network.send(args.length > 1 ? args[1] : "/");
-                StringReceiver sr = new StringReceiver();
-                do {
-                    //sr.put(network.waitForAnswer());
-                } while (!sr.received());
-                System.out.println(sr);
+                if (args.length > 1) {
+                    network.sendObject(new GetFilesListRequest(args[1]));
+                } else {
+                    network.sendObject(new GetFilesListRequest());
+                }
+                GetFilesListResponse response = (GetFilesListResponse) network.waitForAnswer();
+                System.out.println(response);
+                if (response.getStatus() == Status.Failure) {
+                    System.out.println("Server error");
+                } else {
+                    System.out.println(String.join("\n", response.getFilesList()));
+                }
                 break;
             case DELETE_FILES:
                 network.send(Commands.DELETE_FILES.code);
