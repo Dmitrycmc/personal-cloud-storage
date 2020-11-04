@@ -12,7 +12,6 @@ public class GetFilesListResponse extends Response{
         try {
             this.status = Status.Success;
             File folder = new File(path);
-            System.out.println(path);
             filesList = Arrays.stream(folder.listFiles()).map(file -> file.getName() + (file.isDirectory() ? "/" : "")).toArray(String[]::new);
         } catch (Exception e) {
             this.status = Status.Failure;

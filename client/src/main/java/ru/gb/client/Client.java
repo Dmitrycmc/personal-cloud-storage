@@ -21,7 +21,7 @@ public class Client {
     static private Network network;
 
     private static void greetings() {
-        System.out.println("Welcome to personal cloud storage by Lytov Dmitry\n");
+        System.out.println("Welcome to personal cloud storage by Lytov Dmitryget_files");
     }
 
     private static void printHelp() {
@@ -49,11 +49,8 @@ public class Client {
                 break;
             case POST_FILES: {
                 network.sendObject(new PostFileRequest("client_storage/" + args[1]));
-                Response response = (Response) network.waitForAnswer();
-                if (response.getStatus() == Status.Failure) {
+                if (((Response) network.waitForAnswer()).getStatus() == Status.Failure) {
                     System.out.println("Server error");
-                } else {
-                    System.out.println("Package sent: " + args[1]);
                 }
                 File f = new File("client_storage/" + args[1]);
                 long fileSize = f.length();
@@ -61,37 +58,37 @@ public class Client {
                 FileInputStream fis = new FileInputStream(f);
                 while (true) {
                     readBytesCounter += Constants.maxPackageSize;
-                    if (readBytesCounter >= fileSize) {
-                        network.sendObject(new Package(fis.readNBytes(Constants.maxPackageSize), true));
-                        if (response.getStatus() == Status.Failure) {
+                    Package pkg = new Package(fis.readNBytes(Constants.maxPackageSize), readBytesCounter >= fileSize);
+
+                        network.sendObject(pkg);
+                        if (((Response) network.waitForAnswer()).getStatus() == Status.Failure) {
                             System.out.println("Server error");
                         } else {
-                            System.out.println("Package sent: " + args[1]);
+                            System.out.println("Package sent: " + pkg);
                         }
-                        break;
-                    } else {
-                        network.sendObject(new Package(fis.readNBytes(Constants.maxPackageSize), false));
-                        if (response.getStatus() == Status.Failure) {
-                            System.out.println("Server error");
-                        } else {
-                            System.out.println("Package sent: " + args[1]);
-                        }
-                    }
+                    if (readBytesCounter >= fileSize) break;
                 }
+                fis.close();
+                System.out.println("File sent: " + args[1]);
                 break;
             }
             case GET_FILES: {
                 network.sendObject(new GetFileRequest(args[1]));
-                GetFileResponse response = (GetFileResponse) network.waitForAnswer();
-                System.out.println(response);
+
+                Response res = (Response) network.waitForAnswer();
+                GetFileResponse response = (GetFileResponse) res;
                 if (response.getStatus() == Status.Failure) {
                     System.out.println("Server error");
-                } else {
-                    FileOutputStream fos = new FileOutputStream("client_storage/" + response.getFileName());
-                    //fos.write(response.getData());
-                    fos.close();
-                    System.out.println("File received: " + response.getFileName());
+                    break;
                 }
+                Package pkg;
+                FileOutputStream fos = new FileOutputStream("client_storage/" + response.getFileName());
+                do {
+                    pkg = (Package) network.waitForAnswer();
+                    fos.write(pkg.getData());
+                } while (!pkg.isTerminate());
+                fos.close();
+                System.out.println("File received: " + response.getFileName());
                 break;
             }
             case GET_FILES_LIST: {
@@ -101,7 +98,6 @@ public class Client {
                     network.sendObject(new GetFilesListRequest());
                 }
                 GetFilesListResponse response = (GetFilesListResponse) network.waitForAnswer();
-                System.out.println(response);
                 if (response.getStatus() == Status.Failure) {
                     System.out.println("Server error");
                 } else {
@@ -112,7 +108,6 @@ public class Client {
             case DELETE_FILES: {
                 network.sendObject(new DeleteFileRequest(args[1]));
                 Response response = (Response) network.waitForAnswer();
-                System.out.println(response);
                 if (response.getStatus() == Status.Failure) {
                     System.out.println("Server error");
                 } else {
@@ -141,7 +136,7 @@ public class Client {
         greetings();
         Scanner scanner = new Scanner(System.in);
         while (true) {
-            System.out.println("Enter command:");
+            System.out.println("\nEnter command:");
             try {
                 processCommand(scanner.nextLine());
             } catch (IOException e) {
