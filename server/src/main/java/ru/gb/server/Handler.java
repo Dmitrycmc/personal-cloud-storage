@@ -5,11 +5,15 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import ru.gb.common.Commands;
 import ru.gb.common.FileReceiver;
+import ru.gb.common.Status;
 import ru.gb.common.StringReceiver;
 import ru.gb.common.messages.GetFileRequest;
 import ru.gb.common.messages.GetFileResponse;
+import ru.gb.common.messages.PostFileRequest;
+import ru.gb.common.messages.Response;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
@@ -80,6 +84,16 @@ public class Handler extends ChannelInboundHandlerAdapter {
 
         if (msg instanceof GetFileRequest) {
             ctx.writeAndFlush(new GetFileResponse("server_storage/" + ((GetFileRequest) msg).getPath()));
+        }
+        if (msg instanceof PostFileRequest) {
+            try {
+                FileOutputStream fos = new FileOutputStream("server_storage/" + ((PostFileRequest) msg).getFileName(), true);
+                fos.write(((PostFileRequest) msg).getData());
+                fos.close();
+                ctx.writeAndFlush(new Response(Status.Success));
+            } catch (IOException e) {
+                ctx.writeAndFlush(new Response(Status.Failure));
+            }
         }
 //        this.ctx = ctx;
 //

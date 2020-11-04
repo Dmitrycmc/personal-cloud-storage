@@ -1,11 +1,12 @@
 package ru.gb.client;
 
 import ru.gb.common.Commands;
-import ru.gb.common.FileReceiver;
 import ru.gb.common.Status;
 import ru.gb.common.StringReceiver;
 import ru.gb.common.messages.GetFileRequest;
 import ru.gb.common.messages.GetFileResponse;
+import ru.gb.common.messages.PostFileRequest;
+import ru.gb.common.messages.Response;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -44,20 +45,29 @@ public class Client {
             case HELP:
                 printHelp();
                 break;
-            case POST_FILES:
-                network.sendObject(new GetFileRequest(args[1]));
+            case POST_FILES: {
+                network.sendObject(new PostFileRequest("client_storage/" + args[1]));
+                Response response = (Response) network.waitForAnswer();
+                if (response.getStatus() == Status.Failure) {
+                    System.out.println("Server error");
+                } else {
+                    System.out.println("Uploaded file: " + args[1]);
+                }
                 break;
-            case GET_FILES:
+            }
+            case GET_FILES: {
                 network.sendObject(new GetFileRequest(args[1]));
                 GetFileResponse response = (GetFileResponse) network.waitForAnswer();
                 if (response.getStatus() == Status.Failure) {
-                    System.out.println("Ошибка на сервере");
+                    System.out.println("Server error");
                 } else {
                     FileOutputStream fos = new FileOutputStream("client_storage/" + response.getFileName());
                     fos.write(response.getData());
                     fos.close();
+                    System.out.println("File received: " + response.getFileName());
                 }
                 break;
+            }
             case GET_FILES_LIST:
                 network.send(Commands.GET_FILES_LIST.code);
                 network.send(args.length > 1 ? args[1] : "/");

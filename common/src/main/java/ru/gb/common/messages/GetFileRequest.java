@@ -12,4 +12,8 @@ public class GetFileRequest extends Request {
     public String getPath() {
         return path;
     }
+
+    public String toString() {
+        return "Path: " + path;
+    }
 }
