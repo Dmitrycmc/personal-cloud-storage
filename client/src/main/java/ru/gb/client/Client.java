@@ -68,7 +68,7 @@ public class Client {
                 }
                 break;
             }
-            case GET_FILES_LIST:
+            case GET_FILES_LIST: {
                 if (args.length > 1) {
                     network.sendObject(new GetFilesListRequest(args[1]));
                 } else {
@@ -82,10 +82,18 @@ public class Client {
                     System.out.println(String.join("\n", response.getFilesList()));
                 }
                 break;
-            case DELETE_FILES:
-                network.send(Commands.DELETE_FILES.code);
-                network.send(args[1]);
+            }
+            case DELETE_FILES: {
+                network.sendObject(new DeleteFileRequest(args[1]));
+                Response response = (Response) network.waitForAnswer();
+                System.out.println(response);
+                if (response.getStatus() == Status.Failure) {
+                    System.out.println("Server error");
+                } else {
+                    System.out.println("Deleted file: " + args[1]);
+                }
                 break;
+            }
             default:
         }
     }

@@ -84,17 +84,13 @@ public class Handler extends ChannelInboundHandlerAdapter {
             ctx.writeAndFlush(new GetFileResponse("server_storage/" + ((GetFileRequest) msg).getPath()));
         }
         if (msg instanceof PostFileRequest) {
-            try {
-                FileOutputStream fos = new FileOutputStream("server_storage/" + ((PostFileRequest) msg).getFileName(), true);
-                fos.write(((PostFileRequest) msg).getData());
-                fos.close();
-                ctx.writeAndFlush(new Response(Status.Success));
-            } catch (IOException e) {
-                ctx.writeAndFlush(new Response(Status.Failure));
-            }
+            ctx.writeAndFlush(new PostFileResponse("server_storage/" + ((PostFileRequest) msg).getFileName(), ((PostFileRequest) msg).getData()));
         }
         if (msg instanceof GetFilesListRequest) {
             ctx.writeAndFlush(new GetFilesListResponse("server_storage/" + ((GetFilesListRequest) msg).getPath()));
+        }
+        if (msg instanceof DeleteFileRequest) {
+            ctx.writeAndFlush(new DeleteFileResponse("server_storage/" + ((DeleteFileRequest) msg).getPath()));
         }
 
 //        this.ctx = ctx;
