@@ -2,10 +2,7 @@ package ru.gb.common.messages;
 
 import ru.gb.common.Status;
 
-import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
 
 public class PostFileResponse extends Response{
     public PostFileResponse(String path, byte[] data) {

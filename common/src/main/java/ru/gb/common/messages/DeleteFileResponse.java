@@ -2,10 +2,8 @@ package ru.gb.common.messages;
 
 import ru.gb.common.Status;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 public class DeleteFileResponse extends Response{
     public DeleteFileResponse(String path) {

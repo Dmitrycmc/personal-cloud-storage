@@ -2,7 +2,6 @@ package ru.gb.client;
 
 import ru.gb.common.Commands;
 import ru.gb.common.Status;
-import ru.gb.common.StringReceiver;
 import ru.gb.common.messages.*;
 
 import java.io.FileOutputStream;
@@ -11,7 +10,6 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 public class Client {
     static private Network network;

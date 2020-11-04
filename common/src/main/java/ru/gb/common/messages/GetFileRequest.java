@@ -1,7 +1,5 @@
 package ru.gb.common.messages;
 
-import java.io.Serializable;
-
 public class GetFileRequest extends Request {
     private String path;
 
