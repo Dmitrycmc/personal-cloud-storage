@@ -1,6 +1,7 @@
 package ru.gb.client;
 
 import ru.gb.common.Commands;
+import ru.gb.common.Constants;
 import ru.gb.common.Status;
 import ru.gb.common.messages.*;
 
@@ -97,7 +98,7 @@ public class Client {
     }
 
     public static void main(String[] args) {
-        network = new Network("localhost", 8189);
+        network = new Network("localhost", Constants.port);
         network.start();
 
 //        network.send(Paths.get("client_storage/1.jpg"));

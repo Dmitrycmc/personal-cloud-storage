@@ -10,6 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
+import ru.gb.common.Constants;
 
 public class Server {
     private void run() throws Exception {
@@ -22,14 +23,14 @@ public class Server {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             socketChannel.pipeline().addLast(
-                                    new ObjectDecoder(50 * 1024 * 1024, ClassResolvers.cacheDisabled(null)),
+                                    new ObjectDecoder(Constants.maxObjectSize, ClassResolvers.cacheDisabled(null)),
                                     new ObjectEncoder(),
                                     new Handler()
                             );
                         }
                     });
 //                    .childOption(ChannelOption.SO_KEEPALIVE, true);
-            ChannelFuture future = b.bind(8189).sync();
+            ChannelFuture future = b.bind(Constants.port).sync();
             future.channel().closeFuture().sync();
         } finally {
             mainGroup.shutdownGracefully();

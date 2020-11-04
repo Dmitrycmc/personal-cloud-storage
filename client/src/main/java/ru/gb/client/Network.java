@@ -2,6 +2,7 @@ package ru.gb.client;
 
 import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
 import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
+import ru.gb.common.Constants;
 
 import java.io.*;
 import java.net.Socket;
@@ -84,7 +85,7 @@ class Network {
             Socket socket = new Socket(domain, port);
             System.out.println("Соединение установлено!");
             out = new ObjectEncoderOutputStream(socket.getOutputStream());
-            in = new ObjectDecoderInputStream(socket.getInputStream(), 50 * 1024 * 1024);
+            in = new ObjectDecoderInputStream(socket.getInputStream(), Constants.maxObjectSize);
         } catch (IOException e) {
             System.out.println("Не удалось подключиться!");
             System.exit(0);
