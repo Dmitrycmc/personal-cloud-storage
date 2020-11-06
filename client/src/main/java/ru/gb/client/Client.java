@@ -38,11 +38,11 @@ public class Client {
             case HELP:
                 printHelp();
                 break;
-            case POST_FILES: {
+            case POST_FILE: {
                 network.postFiles(args[1]);
                 break;
             }
-            case GET_FILES: {
+            case GET_FILE: {
                 network.getFiles(args[1]);
                 break;
             }
@@ -51,7 +51,7 @@ public class Client {
                 System.out.println(String.join("\n", res));
                 break;
             }
-            case DELETE_FILES: {
+            case DELETE_FILE: {
                 network.deleteFiles(args[1]);
                 break;
             }
@@ -67,8 +67,12 @@ public class Client {
         Scanner scanner = new Scanner(System.in);
         while (true) {
             System.out.println("\nEnter command:");
+            String line = scanner.nextLine();
+            if (line.equalsIgnoreCase(Commands.EXIT.toString())) {
+                break;
+            }
             try {
-                processCommand(scanner.nextLine());
+                processCommand(line);
             } catch (Exception e) {
                 e.printStackTrace();
             }

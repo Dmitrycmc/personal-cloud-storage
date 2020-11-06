@@ -97,7 +97,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
+        logger.info("Connection is closed");
         ctx.close();
     }
 }
