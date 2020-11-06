@@ -3,7 +3,6 @@ package ru.gb.client;
 import ru.gb.common.Commands;
 import ru.gb.common.Constants;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -13,7 +12,7 @@ public class Client {
     static private Network network;
 
     private static void greetings() {
-        System.out.println("Welcome to personal cloud storage by Lytov Dmitryget_files");
+        System.out.println("Welcome to personal cloud storage by Lytov Dmitry");
     }
 
     private static void printHelp() {
@@ -49,6 +48,7 @@ public class Client {
             }
             case GET_FILES_LIST: {
                 String[] res = args.length > 1 ? network.getFilesList(args[1]) : network.getFilesList();
+                System.out.println(String.join("\n", res));
                 break;
             }
             case DELETE_FILES: {

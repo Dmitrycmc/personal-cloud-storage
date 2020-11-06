@@ -2,6 +2,10 @@ package ru.gb.client;
 
 import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
 import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import ru.gb.common.Constants;
 import ru.gb.common.Status;
 import ru.gb.common.messages.*;
@@ -13,6 +17,7 @@ import java.net.Socket;
 class Network {
     private String domain;
     private int port;
+    private final Logger logger = LogManager.getLogger(Network.class);
 
     private ObjectDecoderInputStream in;
     private ObjectEncoderOutputStream out;
@@ -23,24 +28,27 @@ class Network {
     }
 
     private void sendObject(Object obj) throws IOException {
+        logger.trace("Sent to server: " + obj);
         out.writeObject(obj);
     }
 
     private Object waitForAnswer() {
-        Object b = null;
+        Object obj = null;
         try {
-            b = in.readObject();
+            obj = in.readObject();
+            logger.trace("Received from server: " + obj);
         } catch (Exception e) {
-            System.out.println("Соединение разорвано");
+            logger.fatal("Connection lost");
             System.exit(0);
         }
-        return b;
+        return obj;
     }
 
-    public void postFiles(String path) throws IOException {
+    public void postFiles(String path) throws Exception {
         sendObject(new PostFileRequest("client_storage/" + path));
         if (((Response) waitForAnswer()).getStatus() == Status.Failure) {
-            System.out.println("Server error");
+            logger.error("Server error");
+            throw new Exception();
         }
         File f = new File("client_storage/" + path);
         long fileSize = f.length();
@@ -52,13 +60,12 @@ class Network {
 
             sendObject(pkg);
             if (((Response) waitForAnswer()).getStatus() == Status.Failure) {
-                System.out.println("Server error");
-            } else {
-                System.out.println("Package sent: " + pkg);
+                logger.error("Server error");
+                throw new Exception();
             }
         } while (readBytesCounter < fileSize);
         fis.close();
-        System.out.println("File sent: " + path);
+        logger.info("File sent: " + path);
     }
 
     public void getFiles(String path) throws IOException {
@@ -76,7 +83,7 @@ class Network {
             fos.write(pkg.getData());
         } while (!pkg.isTerminate());
         fos.close();
-        System.out.println("File received: " + response.getFileName());
+        logger.info("File received: " + response.getFileName());
     }
 
     public String[] getFilesList() throws Exception {
@@ -87,10 +94,8 @@ class Network {
         sendObject(new GetFilesListRequest(path));
         GetFilesListResponse response = (GetFilesListResponse) waitForAnswer();
         if (response.getStatus() == Status.Failure) {
-            System.out.println("Server error");
+            logger.error("Server error");
             throw new Exception();
-        } else {
-            System.out.println(String.join("\n", response.getFilesList()));
         }
 
         return response.getFilesList();
@@ -100,20 +105,20 @@ class Network {
         sendObject(new DeleteFileRequest(path));
         Response response = (Response) waitForAnswer();
         if (response.getStatus() == Status.Failure) {
-            System.out.println("Server error");
+            logger.error("Server error");
         } else {
-            System.out.println("Deleted file: " + path);
+            logger.info("Deleted file: " + path);
         }
     }
 
     public void start() {
         try {
             Socket socket = new Socket(domain, port);
-            System.out.println("Connection established!");
+            logger.info("Connection established!");
             out = new ObjectEncoderOutputStream(socket.getOutputStream());
             in = new ObjectDecoderInputStream(socket.getInputStream(), Constants.maxObjectSize);
         } catch (IOException e) {
-            System.out.println("Failed to connect!");
+            logger.fatal("Failed to connect!");
             System.exit(0);
         }
     }
