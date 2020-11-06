@@ -2,6 +2,8 @@ package ru.gb.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.gb.common.Constants;
 import ru.gb.common.Status;
 import ru.gb.common.messages.*;
@@ -10,11 +12,19 @@ import ru.gb.common.messages.Package;
 import java.io.*;
 
 public class Handler extends ChannelInboundHandlerAdapter {
+    private final Logger logger = LogManager.getLogger(Handler.class);
     FileOutputStream fos;
+
+    private ChannelHandlerContext ctx;
+    private void send(Object obj) {
+        logger.trace("Sent to client: " + obj);
+        ctx.writeAndFlush(obj);
+    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object request) {
-        System.out.println("\n" + request);
+        this.ctx = ctx;
+        logger.trace("Received from client: " + request);
         Response response;
 
         if (request instanceof GetFileRequest) {
@@ -25,7 +35,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
             long readBytesCounter = 0;
             try {
                 fis = new FileInputStream(f);
-                ctx.writeAndFlush(new GetFileResponse(path));
+                send(new GetFileResponse(path));
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -34,18 +44,16 @@ public class Handler extends ChannelInboundHandlerAdapter {
                     readBytesCounter += Constants.maxPackageSize;
                     if (readBytesCounter >= fileSize) {
                         Package pkg = new Package(fis.readNBytes(Constants.maxPackageSize), true);
-                        ctx.writeAndFlush(pkg);
-                        System.out.println("Package sent: " + pkg);
+                        send(pkg);
                         break;
                     } else {
                         Package pkg = new Package(fis.readNBytes(Constants.maxPackageSize), false);
-                        ctx.writeAndFlush(pkg);
-                        System.out.println("Package Sent: " + pkg);
+                        send(pkg);
                     }
                 }
-                System.out.println("File sent: " + path);
+                logger.info("File sent: " + path);
             } catch (Exception e) {
-                System.out.println("Sending error");
+                logger.error("Sending error");
                 e.printStackTrace();
             } finally {
                 try {
@@ -62,7 +70,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
             } catch (IOException e) {
                 response = new Response(Status.Failure);
             }
-            ctx.writeAndFlush(response);
+            send(response);
         }
         if (request instanceof Package) {
             try {
@@ -74,15 +82,15 @@ public class Handler extends ChannelInboundHandlerAdapter {
             } catch (IOException e) {
                 response = new Response(Status.Failure);
             }
-            ctx.writeAndFlush(response);
+            send(response);
         }
         if (request instanceof GetFilesListRequest) {
             response = new GetFilesListResponse("server_storage/" + ((GetFilesListRequest) request).getPath());
-            ctx.writeAndFlush(response);
+            send(response);
         }
         if (request instanceof DeleteFileRequest) {
             response = new DeleteFileResponse("server_storage/" + ((DeleteFileRequest) request).getPath());
-            ctx.writeAndFlush(response);
+            send(response);
         }
 
     }
