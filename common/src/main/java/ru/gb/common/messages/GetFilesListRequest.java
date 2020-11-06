@@ -6,9 +6,6 @@ public class GetFilesListRequest extends Request {
     public GetFilesListRequest(String path) {
         this.path = path;
     }
-    public GetFilesListRequest() {
-        this.path = "";
-    }
 
     public String getPath() {
         return path;
