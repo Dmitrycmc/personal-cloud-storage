@@ -121,6 +121,16 @@ class Network {
         }
     }
 
+    public void login(String login, String password) throws IOException {
+        sendObject(new LoginRequest(login, password));
+        Response response = (Response) waitForAnswer();
+        if (response.getStatus() == Status.Failure) {
+            logger.error("Server error");
+        } else {
+            logger.info("You logged in as " + login);
+        }
+    }
+
     public void start() {
         try {
             Socket socket = new Socket(domain, port);

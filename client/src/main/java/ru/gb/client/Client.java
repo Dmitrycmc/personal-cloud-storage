@@ -35,6 +35,9 @@ public class Client {
             return;
         }
         switch (matchedCommand.get()) {
+            case LOGIN:
+                network.login(args[1], args[2]);
+                break;
             case HELP:
                 printHelp();
                 break;

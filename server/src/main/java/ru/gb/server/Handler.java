@@ -13,7 +13,13 @@ import java.io.*;
 
 public class Handler extends ChannelInboundHandlerAdapter {
     private final Logger logger = LogManager.getLogger(Handler.class);
-    FileOutputStream fos;
+    private FileOutputStream fos;
+
+    private String login = null;
+
+    private String getStorageBasePath() {
+        return "server_storage/" + login + "/";
+    }
 
     private ChannelHandlerContext ctx;
     private void send(Object obj) {
@@ -27,9 +33,25 @@ public class Handler extends ChannelInboundHandlerAdapter {
         logger.trace("Received from client: " + request);
         Response response;
 
+        if (request instanceof LoginRequest) {
+            response = new LoginResponse(((LoginRequest) request).getLogin(), ((LoginRequest) request).getPassword());
+            if (response.getStatus() == Status.Success) {
+                this.login = ((LoginRequest) request).getLogin();
+                logger.info("Logged in as " + login);
+            } else {
+                logger.error("Invalid authorized data");
+            }
+            send(response);
+            return;
+        }
+        if (login == null) {
+            logger.error("Unauthorized");
+            send(new Response(Status.Failure));
+            return;
+        }
         if (request instanceof GetFileRequest) {
             FileInputStream fis = null;
-            String path = "server_storage/" + ((GetFileRequest) request).getPath();
+            String path = getStorageBasePath() + ((GetFileRequest) request).getPath();
             File f = new File(path);
             long fileSize = f.length();
             long readBytesCounter = 0;
@@ -62,15 +84,17 @@ public class Handler extends ChannelInboundHandlerAdapter {
                     e1.printStackTrace();
                 }
             }
+            return;
         }
         if (request instanceof PostFileRequest) {
             try {
-                fos = new FileOutputStream("server_storage/" + ((PostFileRequest) request).getFileName());
+                fos = new FileOutputStream(getStorageBasePath() + ((PostFileRequest) request).getFileName());
                 response = new Response(Status.Success);
             } catch (IOException e) {
                 response = new Response(Status.Failure);
             }
             send(response);
+            return;
         }
         if (request instanceof Package) {
             try {
@@ -83,20 +107,23 @@ public class Handler extends ChannelInboundHandlerAdapter {
                 response = new Response(Status.Failure);
             }
             send(response);
+            return;
         }
         if (request instanceof GetFilesListRequest) {
-            response = new GetFilesListResponse("server_storage/" + ((GetFilesListRequest) request).getPath());
+            response = new GetFilesListResponse(getStorageBasePath() + ((GetFilesListRequest) request).getPath());
             send(response);
+            return;
         }
         if (request instanceof DeleteFileRequest) {
-            response = new DeleteFileResponse("server_storage/" + ((DeleteFileRequest) request).getPath());
+            response = new DeleteFileResponse(getStorageBasePath() + ((DeleteFileRequest) request).getPath());
             send(response);
+            return;
         }
         if (request instanceof PatchFileRequest) {
-            response = new PatchFileResponse("server_storage/" + ((PatchFileRequest) request).getOldPath(), "server_storage/" + ((PatchFileRequest) request).getNewPath());
+            response = new PatchFileResponse(getStorageBasePath() + ((PatchFileRequest) request).getOldPath(), getStorageBasePath() + ((PatchFileRequest) request).getNewPath());
             send(response);
+            return;
         }
-
     }
 
     @Override
