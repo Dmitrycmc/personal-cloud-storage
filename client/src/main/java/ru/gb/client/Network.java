@@ -111,6 +111,16 @@ class Network {
         }
     }
 
+    public void patchFiles(String oldPath, String newPath) throws IOException {
+        sendObject(new PatchFileRequest(oldPath, newPath));
+        Response response = (Response) waitForAnswer();
+        if (response.getStatus() == Status.Failure) {
+            logger.error("Server error");
+        } else {
+            logger.info("Renamed file: from" + oldPath + " to " + newPath);
+        }
+    }
+
     public void start() {
         try {
             Socket socket = new Socket(domain, port);

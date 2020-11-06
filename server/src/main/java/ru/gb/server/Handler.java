@@ -92,6 +92,10 @@ public class Handler extends ChannelInboundHandlerAdapter {
             response = new DeleteFileResponse("server_storage/" + ((DeleteFileRequest) request).getPath());
             send(response);
         }
+        if (request instanceof PatchFileRequest) {
+            response = new PatchFileResponse("server_storage/" + ((PatchFileRequest) request).getOldPath(), "server_storage/" + ((PatchFileRequest) request).getNewPath());
+            send(response);
+        }
 
     }
 

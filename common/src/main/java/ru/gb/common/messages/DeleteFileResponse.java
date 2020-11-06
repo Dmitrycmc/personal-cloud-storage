@@ -14,11 +14,4 @@ public class DeleteFileResponse extends Response{
             this.status = Status.Failure;
         }
     }
-
-    @Override
-    public String toString() {
-        return "DeleteFileResponse{" +
-                "status=" + status +
-                '}';
-    }
 }

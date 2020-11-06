@@ -55,6 +55,10 @@ public class Client {
                 network.deleteFiles(args[1]);
                 break;
             }
+            case PATCH_FILE: {
+                network.patchFiles(args[1], args[2]);
+                break;
+            }
             default:
         }
     }
