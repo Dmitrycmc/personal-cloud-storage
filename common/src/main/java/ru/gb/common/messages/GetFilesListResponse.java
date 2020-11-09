@@ -12,7 +12,14 @@ public class GetFilesListResponse extends Response{
         try {
             this.status = Status.Success;
             File folder = new File(path);
-            filesList = Arrays.stream(folder.listFiles()).map(file -> file.getName() + (file.isDirectory() ? "/" : "")).toArray(String[]::new);
+            filesList = Arrays.stream(folder.listFiles()).sorted((f1, f2) -> {
+                boolean dir1 = f1.isDirectory();
+                boolean dir2 = f2.isDirectory();
+                if (dir1 == dir2) {
+                    return 0;
+                }
+                return dir1 ? -1 : 1;
+            }).map(file -> file.getName() + (file.isDirectory() ? "/" : "")).toArray(String[]::new);
         } catch (Exception e) {
             this.status = Status.Failure;
             e.printStackTrace();

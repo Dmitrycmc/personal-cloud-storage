@@ -51,27 +51,27 @@ public class CommandLineClient {
                 break;
             case POST: {
                 checkArgumentsNumber(args, 1);
-                network.postFiles(args[1]);
+                network.postFile(args[1]);
                 break;
             }
             case GET: {
                 checkArgumentsNumber(args, 1);
-                network.getFiles(args[1]);
+                network.getFile(args[1]);
                 break;
             }
             case GET_LIST: {
-                String[] res = args.length > 1 ? network.getFilesList(args[1]) : network.getFilesList();
+                String[] res = args.length > 1 ? network.getList(args[1]) : network.getList();
                 System.out.println(String.join("\n", res));
                 break;
             }
             case DELETE: {
                 checkArgumentsNumber(args, 1);
-                network.deleteFiles(args[1]);
+                network.deleteFile(args[1]);
                 break;
             }
             case PATCH: {
                 checkArgumentsNumber(args, 2);
-                network.patchFiles(args[1], args[2]);
+                network.patchFile(args[1], args[2]);
                 break;
             }
             default:

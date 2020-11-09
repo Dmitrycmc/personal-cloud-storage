@@ -34,7 +34,7 @@ public class Network {
         out.writeObject(obj);
     }
 
-    Object waitForAnswer() {
+    private Object waitForAnswer() {
         Object obj = null;
         try {
             obj = in.readObject();
@@ -57,7 +57,7 @@ public class Network {
         }
     }
 
-    public void postFiles(String path) throws Exception {
+    public void postFile(String path) throws Exception {
         sendObject(new PostFileRequest("client_storage/" + path));
         Response response = (Response) waitForAnswer();
 
@@ -80,7 +80,7 @@ public class Network {
         logger.info("File sent: " + path);
     }
 
-    public void getFiles(String path) throws Exception {
+    public void getFile(String path) throws Exception {
         sendObject(new GetFileRequest(path));
 
         GetFileResponse response = (GetFileResponse) waitForAnswer();
@@ -97,11 +97,11 @@ public class Network {
         logger.info("File received: " + response.getFileName());
     }
 
-    public String[] getFilesList() throws Exception {
-        return getFilesList("");
+    public String[] getList() throws Exception {
+        return getList("");
     }
 
-    public String[] getFilesList(String path) throws Exception {
+    public String[] getList(String path) throws Exception {
         sendObject(new GetFilesListRequest(path));
         GetFilesListResponse response = (GetFilesListResponse) waitForAnswer();
 
@@ -110,7 +110,7 @@ public class Network {
         return response.getFilesList();
     }
 
-    public void deleteFiles(String path) throws Exception {
+    public void deleteFile(String path) throws Exception {
         sendObject(new DeleteFileRequest(path));
         Response response = (Response) waitForAnswer();
 
@@ -119,7 +119,7 @@ public class Network {
         logger.info("Deleted file: " + path);
     }
 
-    public void patchFiles(String oldPath, String newPath) throws Exception {
+    public void patchFile(String oldPath, String newPath) throws Exception {
         sendObject(new PatchFileRequest(oldPath, newPath));
         Response response = (Response) waitForAnswer();
 
