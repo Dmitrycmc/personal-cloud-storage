@@ -14,10 +14,9 @@ public class MainWindow extends JFrame {
         network.start();
 
         setBounds(300, 300, 800, 400);
-        setTitle("Personal cloud storage");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        setVisible(true);
+        new AuthWindow(network, this);
     }
 
     public static void main(String[] args) {

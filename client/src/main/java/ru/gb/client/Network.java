@@ -34,7 +34,7 @@ public class Network {
         out.writeObject(obj);
     }
 
-    private Object waitForAnswer() {
+    Object waitForAnswer() {
         Object obj = null;
         try {
             obj = in.readObject();
@@ -132,6 +132,9 @@ public class Network {
         sendObject(new LoginRequest(login, password));
         Response response = (Response) waitForAnswer();
         if (response.getStatus() == Status.Unauthorized) {
+            logger.error("Invalid login or password");
+            throw new UnauthorizedException();
+        } else if (response.getStatus() == Status.Failure) {
             logger.error("Server error");
             throw new UnauthorizedException();
         } else {

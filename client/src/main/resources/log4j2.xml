@@ -14,7 +14,7 @@
         </Console>
     </Appenders>
     <Loggers>
-        <Logger name="ru.geekbrains.server" level="trace"/>
+        <Logger name="ru.geekbrains.client" level="trace"/>
         <Root level="trace">
             <AppenderRef ref="STDOUT"/>
             <AppenderRef ref="FILE"/>
