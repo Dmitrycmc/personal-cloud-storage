@@ -1,5 +1,6 @@
 package ru.gb.client;
 
+import ru.gb.client.exceptions.*;
 import ru.gb.common.Commands;
 import ru.gb.common.Constants;
 
@@ -25,40 +26,50 @@ public class Client {
         System.out.println();
     }
 
+    private static void checkArgumentsNumber(String[] args, int argumentsNumber) throws InvalidArgumentsNumberException {
+        if (args.length < argumentsNumber + 1) {
+            throw new InvalidArgumentsNumberException(argumentsNumber);
+        }
+    }
+
     private static void processCommand(String line) throws Exception {
         String[] args = line.trim().replaceAll("( )+", " ").split(" ");
         String command = args[0];
 
         Optional<Commands> matchedCommand = Arrays.stream(Commands.class.getEnumConstants()).filter(c -> command.equalsIgnoreCase(c.toString())).findAny();
         if (!matchedCommand.isPresent()) {
-            System.out.println("Wrong command");
-            return;
+            throw new WrongCommandException();
         }
         switch (matchedCommand.get()) {
             case LOGIN:
+                checkArgumentsNumber(args, 2);
                 network.login(args[1], args[2]);
                 break;
             case HELP:
                 printHelp();
                 break;
-            case POST_FILE: {
+            case POST: {
+                checkArgumentsNumber(args, 1);
                 network.postFiles(args[1]);
                 break;
             }
-            case GET_FILE: {
+            case GET: {
+                checkArgumentsNumber(args, 1);
                 network.getFiles(args[1]);
                 break;
             }
-            case GET_FILES_LIST: {
+            case GET_LIST: {
                 String[] res = args.length > 1 ? network.getFilesList(args[1]) : network.getFilesList();
                 System.out.println(String.join("\n", res));
                 break;
             }
-            case DELETE_FILE: {
+            case DELETE: {
+                checkArgumentsNumber(args, 1);
                 network.deleteFiles(args[1]);
                 break;
             }
-            case PATCH_FILE: {
+            case PATCH: {
+                checkArgumentsNumber(args, 2);
                 network.patchFiles(args[1], args[2]);
                 break;
             }
@@ -84,6 +95,10 @@ public class Client {
                 System.out.println("Unauthorized");
             } catch (ServerException e) {
                 System.out.println("Server error");
+            } catch (WrongCommandException e) {
+                System.out.println("Wrong command");
+            } catch (InvalidArgumentsNumberException e) {
+                System.out.println("Invalid arguments number, required " + e.getRequiredArgumentsNumber());
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -10,12 +10,12 @@ public enum Commands {
     PATCH_USER("newLogin"),
     DELETE_USER(),
 
-    GET_FILES_LIST("path"),
+    GET_LIST("path"),
 
-    GET_FILE("path"),
-    POST_FILE("path"),
-    PATCH_FILE("oldPath, newPath"),
-    DELETE_FILE("path");
+    GET("path"),
+    POST("path"),
+    PATCH("oldPath, newPath"),
+    DELETE("path");
 
     public final String params;
 

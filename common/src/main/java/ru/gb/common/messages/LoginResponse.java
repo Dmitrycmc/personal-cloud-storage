@@ -7,7 +7,7 @@ public class LoginResponse extends Response{
         if (login.equals("Dima") && password.equals("0000")) {
             this.status = Status.Success;
         } else {
-            this.status = Status.Failure;
+            this.status = Status.Unauthorized;
         }
     }
 }

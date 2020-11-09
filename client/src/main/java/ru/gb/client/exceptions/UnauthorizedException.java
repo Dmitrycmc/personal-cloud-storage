@@ -1,4 +1,4 @@
-package ru.gb.client;
+package ru.gb.client.exceptions;
 
 public class UnauthorizedException extends Exception {
 }

@@ -6,6 +6,8 @@ import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import ru.gb.client.exceptions.ServerException;
+import ru.gb.client.exceptions.UnauthorizedException;
 import ru.gb.common.Constants;
 import ru.gb.common.Status;
 import ru.gb.common.messages.*;
@@ -129,8 +131,9 @@ class Network {
     public void login(String login, String password) throws Exception {
         sendObject(new LoginRequest(login, password));
         Response response = (Response) waitForAnswer();
-        if (response.getStatus() == Status.Failure) {
+        if (response.getStatus() == Status.Unauthorized) {
             logger.error("Server error");
+            throw new UnauthorizedException();
         } else {
             logger.info("You logged in as " + login);
         }
