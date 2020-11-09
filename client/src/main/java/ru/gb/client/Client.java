@@ -80,6 +80,10 @@ public class Client {
             }
             try {
                 processCommand(line);
+            } catch (UnauthorizedException e) {
+                System.out.println("Unauthorized");
+            } catch (ServerException e) {
+                System.out.println("Server error");
             } catch (Exception e) {
                 e.printStackTrace();
             }

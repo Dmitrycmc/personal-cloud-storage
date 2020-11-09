@@ -1,5 +1,5 @@
 package ru.gb.common;
 
 public enum Status {
-    Success, Failure
+    Success, Failure, Unauthorized
 }

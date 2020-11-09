@@ -46,7 +46,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
         }
         if (login == null) {
             logger.error("Unauthorized");
-            send(new Response(Status.Failure));
+            send(new Response(Status.Unauthorized));
             return;
         }
         if (request instanceof GetFileRequest) {

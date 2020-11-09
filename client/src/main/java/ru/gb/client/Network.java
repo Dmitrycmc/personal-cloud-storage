@@ -44,12 +44,23 @@ class Network {
         return obj;
     }
 
+    private void checkErrors(Response response) throws Exception {
+        if (response.getStatus() == Status.Failure) {
+            logger.error("Server error");
+            throw new ServerException();
+        }
+        if (response.getStatus() == Status.Unauthorized) {
+            logger.error("Unauthorized");
+            throw new UnauthorizedException();
+        }
+    }
+
     public void postFiles(String path) throws Exception {
         sendObject(new PostFileRequest("client_storage/" + path));
-        if (((Response) waitForAnswer()).getStatus() == Status.Failure) {
-            logger.error("Server error");
-            throw new Exception();
-        }
+        Response response = (Response) waitForAnswer();
+
+        checkErrors(response);
+
         File f = new File("client_storage/" + path);
         long fileSize = f.length();
         long readBytesCounter = 0;
@@ -59,23 +70,21 @@ class Network {
             Package pkg = new Package(fis.readNBytes(Constants.maxPackageSize), readBytesCounter >= fileSize);
 
             sendObject(pkg);
-            if (((Response) waitForAnswer()).getStatus() == Status.Failure) {
-                logger.error("Server error");
-                throw new Exception();
-            }
+            response = (Response) waitForAnswer();
+
+            checkErrors(response);
         } while (readBytesCounter < fileSize);
         fis.close();
         logger.info("File sent: " + path);
     }
 
-    public void getFiles(String path) throws IOException {
+    public void getFiles(String path) throws Exception {
         sendObject(new GetFileRequest(path));
 
-        Response res = (Response) waitForAnswer();
-        GetFileResponse response = (GetFileResponse) res;
-        if (response.getStatus() == Status.Failure) {
-            throw new IOException();
-        }
+        GetFileResponse response = (GetFileResponse) waitForAnswer();
+
+        checkErrors(response);
+
         Package pkg;
         FileOutputStream fos = new FileOutputStream("client_storage/" + response.getFileName());
         do {
@@ -93,35 +102,31 @@ class Network {
     public String[] getFilesList(String path) throws Exception {
         sendObject(new GetFilesListRequest(path));
         GetFilesListResponse response = (GetFilesListResponse) waitForAnswer();
-        if (response.getStatus() == Status.Failure) {
-            logger.error("Server error");
-            throw new Exception();
-        }
+
+        checkErrors(response);
 
         return response.getFilesList();
     }
 
-    public void deleteFiles(String path) throws IOException {
+    public void deleteFiles(String path) throws Exception {
         sendObject(new DeleteFileRequest(path));
         Response response = (Response) waitForAnswer();
-        if (response.getStatus() == Status.Failure) {
-            logger.error("Server error");
-        } else {
-            logger.info("Deleted file: " + path);
-        }
+
+        checkErrors(response);
+
+        logger.info("Deleted file: " + path);
     }
 
-    public void patchFiles(String oldPath, String newPath) throws IOException {
+    public void patchFiles(String oldPath, String newPath) throws Exception {
         sendObject(new PatchFileRequest(oldPath, newPath));
         Response response = (Response) waitForAnswer();
-        if (response.getStatus() == Status.Failure) {
-            logger.error("Server error");
-        } else {
-            logger.info("Renamed file: from" + oldPath + " to " + newPath);
-        }
+
+        checkErrors(response);
+
+        logger.info("Renamed file: from" + oldPath + " to " + newPath);
     }
 
-    public void login(String login, String password) throws IOException {
+    public void login(String login, String password) throws Exception {
         sendObject(new LoginRequest(login, password));
         Response response = (Response) waitForAnswer();
         if (response.getStatus() == Status.Failure) {
