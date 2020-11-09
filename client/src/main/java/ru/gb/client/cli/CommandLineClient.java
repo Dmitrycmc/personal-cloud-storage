@@ -108,14 +108,12 @@ public class CommandLineClient {
 }
 
 // todo: handle all exceptions
-// todo: store users in DB
-// todo: creating users
 // todo: hash sum
 // todo: tree-view server storage
-// todo: logout
 // todo: transferring progress
 // todo: sync
 // todo: sharing
 // todo: session token
 // todo: refactor server handler
 // todo: encryption
+// todo: server security

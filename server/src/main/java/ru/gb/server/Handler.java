@@ -10,6 +10,9 @@ import ru.gb.common.messages.*;
 import ru.gb.common.messages.Package;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 
 public class Handler extends ChannelInboundHandlerAdapter {
     private final Logger logger = LogManager.getLogger(Handler.class);
@@ -34,12 +37,15 @@ public class Handler extends ChannelInboundHandlerAdapter {
         Response response;
 
         if (request instanceof LoginRequest) {
-            response = new LoginResponse(((LoginRequest) request).getLogin(), ((LoginRequest) request).getPassword());
-            if (response.getStatus() == Status.Success) {
-                this.login = ((LoginRequest) request).getLogin();
+            String login = ((LoginRequest) request).getLogin();
+            String password = ((LoginRequest) request).getPassword();
+            if (isSignInDataCorrect(login, password)) {
+                this.login = login;
                 logger.info("Logged in as " + login);
+                response = new Response(Status.Success);
             } else {
                 logger.error("Invalid authorized data");
+                response = new Response(Status.Failure);
             }
             send(response);
             return;
@@ -87,8 +93,9 @@ public class Handler extends ChannelInboundHandlerAdapter {
             return;
         }
         if (request instanceof PostFileRequest) {
+            String fileName = ((PostFileRequest) request).getFileName();
             try {
-                fos = new FileOutputStream(getStorageBasePath() + ((PostFileRequest) request).getFileName());
+                fos = new FileOutputStream(getStorageBasePath() + fileName);
                 response = new Response(Status.Success);
             } catch (IOException e) {
                 response = new Response(Status.Failure);
@@ -98,8 +105,10 @@ public class Handler extends ChannelInboundHandlerAdapter {
         }
         if (request instanceof Package) {
             try {
-                fos.write(((Package) request).getData());
-                if (((Package) request).isTerminate()) {
+                byte[] data = ((Package) request).getData();
+                boolean isTerminate = ((Package) request).isTerminate();
+                fos.write(data);
+                if (isTerminate) {
                     fos.close();
                 }
                 response = new Response(Status.Success);
@@ -110,20 +119,60 @@ public class Handler extends ChannelInboundHandlerAdapter {
             return;
         }
         if (request instanceof GetFilesListRequest) {
-            response = new GetFilesListResponse(getStorageBasePath() + ((GetFilesListRequest) request).getPath());
+            String path = ((GetFilesListRequest) request).getPath();
+            String[] filesList = getFilesList(getStorageBasePath() + path);
+            response = new GetFilesListResponse(filesList);
             send(response);
             return;
         }
         if (request instanceof DeleteFileRequest) {
-            response = new DeleteFileResponse(getStorageBasePath() + ((DeleteFileRequest) request).getPath());
+            String path = ((DeleteFileRequest) request).getPath();
+            if (deleteFile(getStorageBasePath() + path)) {
+                response = new Response(Status.Success);
+            } else {
+                response = new Response(Status.Failure);
+            }
             send(response);
             return;
         }
-        if (request instanceof PatchFileRequest) {
+        /*if (request instanceof PatchFileRequest) {
             response = new PatchFileResponse(getStorageBasePath() + ((PatchFileRequest) request).getOldPath(), getStorageBasePath() + ((PatchFileRequest) request).getNewPath());
             send(response);
             return;
+        }*/
+    }
+
+    private boolean deleteFile(String path) {
+        try {
+            Files.delete(Paths.get(path));
+            return true;
+        } catch (Exception e) {
+            return false;
         }
+    }
+
+    private String[] getFilesList(String path) {
+        try {
+            File folder = new File(path);
+            return Arrays.stream(folder.listFiles()).sorted((f1, f2) -> {
+                boolean dir1 = f1.isDirectory();
+                boolean dir2 = f2.isDirectory();
+                if (dir1 == dir2) {
+                    return f1.getName().compareTo(f2.getName());
+                }
+                return dir1 ? -1 : 1;
+            }).map(file -> file.getName() + (file.isDirectory() ? "/" : "")).toArray(String[]::new);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private boolean isSignInDataCorrect(String login, String password) {
+        // todo: store users in DB
+        // todo: logout
+        // todo: creating users
+        return login.equals("Dima") && password.equals("0000");
     }
 
     @Override
