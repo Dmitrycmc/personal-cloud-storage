@@ -8,7 +8,6 @@ import java.awt.*;
 
 class AuthWindow extends JFrame {
     private Network network;
-    private MainWindow mainWindow;
     private JTextField loginField;
     private JTextField passwordField;
 
@@ -18,22 +17,19 @@ class AuthWindow extends JFrame {
         if (login.length() > 0 && password.length() > 0) {
             try {
                 network.login(login, password);
-
+                MainWindow mainWindow = new MainWindow(network);
                 mainWindow.setTitle("Personal cloud storage [" + login + "]");
                 setVisible(false);
-                mainWindow.setVisible(true);
-
             } catch (UnauthorizedException e) {
-                JOptionPane.showMessageDialog(mainWindow, "Invalid login or password", "Unauthorized", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Invalid login or password", "Unauthorized", JOptionPane.ERROR_MESSAGE);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
-    AuthWindow(Network network, MainWindow mainWindow) {
+    AuthWindow(Network network) {
         this.network = network;
-        this.mainWindow = mainWindow;
 
         setTitle("Sign in");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
