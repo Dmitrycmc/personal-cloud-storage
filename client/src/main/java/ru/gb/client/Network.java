@@ -80,15 +80,21 @@ public class Network {
         logger.info("File sent: " + path);
     }
 
-    public void getFile(String path) throws Exception {
-        sendObject(new GetFileRequest(path));
+    public void getFile(String serverPath) throws Exception {
+        String[] splittedPath = serverPath.split("/");
+        String clientPath = splittedPath[splittedPath.length - 1];
+        getFile(serverPath, "client_storage/" + clientPath);
+    }
+
+    public void getFile(String serverPath, String clientPath) throws Exception {
+        sendObject(new GetFileRequest(serverPath));
 
         GetFileResponse response = (GetFileResponse) waitForAnswer();
 
         checkErrors(response);
 
         Package pkg;
-        FileOutputStream fos = new FileOutputStream("client_storage/" + response.getFileName());
+        FileOutputStream fos = new FileOutputStream(clientPath);
         do {
             pkg = (Package) waitForAnswer();
             fos.write(pkg.getData());
