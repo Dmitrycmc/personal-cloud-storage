@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Scanner;
 
-public class Client {
+public class CLI {
     static private Network network;
 
     private static void greetings() {
