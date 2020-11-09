@@ -80,8 +80,14 @@ class MainWindow extends JFrame {
         });*/
         deleteButton.addActionListener(e -> {
             try {
-                network.deleteFile("");
-                refreshListData();
+                String serverPath = filesListBox.getSelectedValue();
+                int input = JOptionPane.showConfirmDialog(this,
+                        "Do you really want to delete " + serverPath + "?", "Delete file?",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                if (input == JOptionPane.YES_OPTION) {
+                    network.deleteFile(serverPath);
+                    refreshListData();
+                }
             } catch (Exception e1) {
                 JOptionPane.showMessageDialog(null, "Server error", "Unable to delete file", JOptionPane.ERROR_MESSAGE);
                 e1.printStackTrace();
