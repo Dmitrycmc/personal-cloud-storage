@@ -1,5 +1,6 @@
-package ru.gb.client;
+package ru.gb.client.cli;
 
+import ru.gb.client.Network;
 import ru.gb.client.exceptions.*;
 import ru.gb.common.Commands;
 import ru.gb.common.Constants;
@@ -9,7 +10,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Scanner;
 
-public class CLI {
+public class CommandLineClient {
     static private Network network;
 
     private static void greetings() {

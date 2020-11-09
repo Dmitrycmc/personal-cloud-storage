@@ -16,7 +16,7 @@ import ru.gb.common.messages.Package;
 import java.io.*;
 import java.net.Socket;
 
-class Network {
+public class Network {
     private String domain;
     private int port;
     private final Logger logger = LogManager.getLogger(Network.class);
@@ -24,7 +24,7 @@ class Network {
     private ObjectDecoderInputStream in;
     private ObjectEncoderOutputStream out;
 
-    Network(String domain, int port) {
+    public Network(String domain, int port) {
         this.domain = domain;
         this.port = port;
     }

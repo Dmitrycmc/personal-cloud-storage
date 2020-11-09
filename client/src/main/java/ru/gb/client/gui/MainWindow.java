@@ -1,14 +1,15 @@
-package ru.gb.client;
+package ru.gb.client.gui;
 
+import ru.gb.client.Network;
 import ru.gb.common.Constants;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class GUI extends JFrame {
+public class MainWindow extends JFrame {
     private Network network;
 
-    public GUI() throws HeadlessException {
+    public MainWindow() throws HeadlessException {
         network = new Network("localhost", Constants.port);
         network.start();
 
@@ -20,6 +21,6 @@ public class GUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        new GUI();
+        new MainWindow();
     }
 }
