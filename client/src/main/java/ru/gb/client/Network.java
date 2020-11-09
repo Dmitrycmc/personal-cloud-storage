@@ -58,12 +58,12 @@ public class Network {
     }
 
     public void postFile(String path) throws Exception {
-        sendObject(new PostFileRequest("client_storage/" + path));
+        sendObject(new PostFileRequest(path));
         Response response = (Response) waitForAnswer();
 
         checkErrors(response);
 
-        File f = new File("client_storage/" + path);
+        File f = new File(path);
         long fileSize = f.length();
         long readBytesCounter = 0;
         FileInputStream fis = new FileInputStream(f);

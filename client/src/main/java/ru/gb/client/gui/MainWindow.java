@@ -4,27 +4,23 @@ import ru.gb.client.Network;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 
 class MainWindow extends JFrame {
     private Network network;
+    JList<String> filesListBox;
 
-    private JScrollPane renderFilesList() {
+    private void refreshListData() {
         String[] filesList = new String[0];
         try {
             filesList = network.getList();
         } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Server error", "Unable to get files list", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
-
-        JList<String> list = new JList<>(filesList);
-        list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        list.setLayoutOrientation(JList.VERTICAL);
-        list.setVisibleRowCount(-1);
-
-        JScrollPane listScroller = new JScrollPane(list);
-        listScroller.setPreferredSize(new Dimension(250, 80));
-
-        return listScroller;
+        filesListBox.setListData(filesList);
     }
 
     MainWindow(Network network) throws HeadlessException {
@@ -32,9 +28,39 @@ class MainWindow extends JFrame {
         setBounds(300, 300, 400, 400);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
+        setLayout(new GridLayout(2, 1));
 
-        JScrollPane filesList = renderFilesList();
-        add(filesList);
+        filesListBox = new JList<>();
+        filesListBox.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        filesListBox.setLayoutOrientation(JList.VERTICAL);
+        filesListBox.setVisibleRowCount(-1);
+
+        JScrollPane listScroller = new JScrollPane(filesListBox);
+        listScroller.setPreferredSize(new Dimension(250, 80));
+
+        refreshListData();
+        add(listScroller);
+
+
+        final JFileChooser fileChooser = new JFileChooser();
+
+        JButton uploadButton = new JButton("Upload");
+        uploadButton.addActionListener(e -> {
+            if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                String path = selectedFile.getAbsolutePath();
+
+                try {
+                    network.postFile(path);
+                    refreshListData();
+                } catch (Exception e1) {
+                    JOptionPane.showMessageDialog(null, "Server error", "Unable to upload file", JOptionPane.ERROR_MESSAGE);
+                    e1.printStackTrace();
+                }
+            }
+        });
+        add(uploadButton);
+
 
         setVisible(true);
     }

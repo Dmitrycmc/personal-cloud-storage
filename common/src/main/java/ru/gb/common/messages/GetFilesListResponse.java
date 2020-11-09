@@ -16,7 +16,7 @@ public class GetFilesListResponse extends Response{
                 boolean dir1 = f1.isDirectory();
                 boolean dir2 = f2.isDirectory();
                 if (dir1 == dir2) {
-                    return 0;
+                    return f1.getName().compareTo(f2.getName());
                 }
                 return dir1 ? -1 : 1;
             }).map(file -> file.getName() + (file.isDirectory() ? "/" : "")).toArray(String[]::new);
