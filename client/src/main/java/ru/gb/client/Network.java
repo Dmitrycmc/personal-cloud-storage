@@ -89,7 +89,7 @@ public class Network {
     public void getFile(String serverPath, String clientPath) throws Exception {
         sendObject(new GetFileRequest(serverPath));
 
-        GetFileResponse response = (GetFileResponse) waitForAnswer();
+        Response response = (Response) waitForAnswer();
 
         checkErrors(response);
 
@@ -100,7 +100,7 @@ public class Network {
             fos.write(pkg.getData());
         } while (!pkg.isTerminate());
         fos.close();
-        logger.info("File received: " + response.getFileName());
+        logger.info("File received: " + ((GetFileResponse)response).getFileName());
     }
 
     public String[] getList() throws Exception {

@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 class MainWindow extends JFrame {
     private Network network;
     private JList<String> filesListBox;
+    private JPanel buttonsPanel = new JPanel();
     private JButton downloadButton = new JButton("Download");
     private JButton renameButton = new JButton("Rename");
     private JButton deleteButton = new JButton("Delete");
@@ -20,15 +21,21 @@ class MainWindow extends JFrame {
         setBounds(300, 300, 400, 400);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        setLayout(new GridLayout(3, 1));
+        setLayout(new BorderLayout(3, 1));
 
         addFilesListBox();
-        addControlsPanel();
-        addUploadButton();
+        addButtonsPanel();
 
         refreshListData();
 
         setVisible(true);
+    }
+
+    private void addButtonsPanel() {
+        buttonsPanel.setLayout(new GridLayout(2, 1));
+        addControlsPanel();
+        addUploadButton();
+        add(buttonsPanel, BorderLayout.SOUTH);
     }
 
     private void addFilesListBox() {
@@ -41,7 +48,7 @@ class MainWindow extends JFrame {
         });
         JScrollPane listScroller = new JScrollPane(filesListBox);
         listScroller.setPreferredSize(new Dimension(250, 80));
-        add(listScroller);
+        add(listScroller, BorderLayout.CENTER);
     }
 
     private void addControlsPanel() {
@@ -72,7 +79,7 @@ class MainWindow extends JFrame {
         renameButton.addActionListener(e -> {
             try {
                 String oldName = filesListBox.getSelectedValue();
-                String newName = JOptionPane.showInputDialog(this, "Enter new name for file " + oldName);
+                String newName = JOptionPane.showInputDialog(this, "Enter new name for file " + oldName, oldName);
                 network.patchFile(oldName, newName);
                 refreshListData();
             } catch (Exception e1) {
@@ -100,7 +107,7 @@ class MainWindow extends JFrame {
         controllerPanel.add(renameButton);
         controllerPanel.add(deleteButton);
 
-        add(controllerPanel);
+        buttonsPanel.add(controllerPanel);
     }
 
     private void addUploadButton() {
@@ -121,7 +128,7 @@ class MainWindow extends JFrame {
                 }
             }
         });
-        add(uploadButton);
+        buttonsPanel.add(uploadButton);
     }
 
     private void refreshListData() {

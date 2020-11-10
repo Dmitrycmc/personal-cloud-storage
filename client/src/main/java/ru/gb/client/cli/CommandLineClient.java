@@ -114,6 +114,5 @@ public class CommandLineClient {
 // todo: sync
 // todo: sharing
 // todo: session token
-// todo: refactor server handler
 // todo: encryption
 // todo: server security

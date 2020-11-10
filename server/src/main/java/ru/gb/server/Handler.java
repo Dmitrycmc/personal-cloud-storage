@@ -66,7 +66,9 @@ public class Handler extends ChannelInboundHandlerAdapter {
                 fis = new FileInputStream(f);
                 send(new GetFileResponse(path));
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                send(new Response(false));
+                logger.error("File not found: " + path);
+                return;
             }
             try {
                 do {
@@ -130,7 +132,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
         if (request instanceof PatchFileRequest) {
             String oldPath = ((PatchFileRequest) request).getOldPath();
             String newPath = ((PatchFileRequest) request).getNewPath();
-            boolean resultFlag = patchFile(oldPath, newPath);
+            boolean resultFlag = patchFile(getStorageBasePath() + oldPath, getStorageBasePath() + newPath);
             response = new Response(resultFlag);
             send(response);
             return;
@@ -141,11 +143,9 @@ public class Handler extends ChannelInboundHandlerAdapter {
         try {
             File file1 = new File(oldPath);
             File file2 = new File(newPath);
-
             if (!file1.exists() || file2.exists() || !file1.renameTo(file2)) {
                 throw new Exception();
             }
-
             return true;
         } catch (Exception e) {
             return false;
