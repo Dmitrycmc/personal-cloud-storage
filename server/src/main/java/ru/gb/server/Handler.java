@@ -12,6 +12,7 @@ import ru.gb.common.messages.Package;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.Arrays;
 
 public class Handler extends ChannelInboundHandlerAdapter {
@@ -46,7 +47,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
                 response = new Response(Status.Success);
             } else {
                 logger.error("Invalid authorized data");
-                response = new Response(Status.Failure);
+                response = new Response(Status.Unauthorized);
             }
             send(response);
             return;
@@ -179,10 +180,15 @@ public class Handler extends ChannelInboundHandlerAdapter {
     }
 
     private boolean isSignInDataCorrect(String login, String password) {
-        // todo: store users in DB
         // todo: logout
         // todo: creating users
-        return login.equals("Dima") && password.equals("0000");
+        JdbcClass db = new JdbcClass(logger);
+        try {
+            return db.authUser(login, password);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
