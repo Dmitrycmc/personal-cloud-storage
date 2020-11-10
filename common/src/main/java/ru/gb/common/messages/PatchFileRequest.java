@@ -18,7 +18,7 @@ public class PatchFileRequest extends Request {
 
     @Override
     public String toString() {
-        return "DeleteFileRequest{" +
+        return "PatchFileRequest{" +
                 "oldPath='" + oldPath + '\'' +
                 "newPath='" + newPath + '\'' +
                 '}';

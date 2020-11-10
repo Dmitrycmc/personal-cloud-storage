@@ -25,6 +25,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
     }
 
     private ChannelHandlerContext ctx;
+
     private void send(Object obj) {
         logger.trace("Sent to client: " + obj);
         ctx.writeAndFlush(obj);
@@ -68,17 +69,11 @@ public class Handler extends ChannelInboundHandlerAdapter {
                 e.printStackTrace();
             }
             try {
-                while (true) {
+                do {
                     readBytesCounter += Constants.maxPackageSize;
-                    if (readBytesCounter >= fileSize) {
-                        Package pkg = new Package(fis.readNBytes(Constants.maxPackageSize), true);
-                        send(pkg);
-                        break;
-                    } else {
-                        Package pkg = new Package(fis.readNBytes(Constants.maxPackageSize), false);
-                        send(pkg);
-                    }
-                }
+                    Package pkg = new Package(fis.readNBytes(Constants.maxPackageSize), readBytesCounter >= fileSize);
+                    send(pkg);
+                } while (readBytesCounter < fileSize);
                 logger.info("File sent: " + path);
             } catch (Exception e) {
                 logger.error("Sending error");
@@ -127,19 +122,34 @@ public class Handler extends ChannelInboundHandlerAdapter {
         }
         if (request instanceof DeleteFileRequest) {
             String path = ((DeleteFileRequest) request).getPath();
-            if (deleteFile(getStorageBasePath() + path)) {
-                response = new Response(Status.Success);
-            } else {
-                response = new Response(Status.Failure);
-            }
+            boolean resultFlag = deleteFile(getStorageBasePath() + path);
+            response = new Response(resultFlag);
             send(response);
             return;
         }
-        /*if (request instanceof PatchFileRequest) {
-            response = new PatchFileResponse(getStorageBasePath() + ((PatchFileRequest) request).getOldPath(), getStorageBasePath() + ((PatchFileRequest) request).getNewPath());
+        if (request instanceof PatchFileRequest) {
+            String oldPath = ((PatchFileRequest) request).getOldPath();
+            String newPath = ((PatchFileRequest) request).getNewPath();
+            boolean resultFlag = patchFile(oldPath, newPath);
+            response = new Response(resultFlag);
             send(response);
             return;
-        }*/
+        }
+    }
+
+    private boolean patchFile(String oldPath, String newPath) {
+        try {
+            File file1 = new File(oldPath);
+            File file2 = new File(newPath);
+
+            if (!file1.exists() || file2.exists() || !file1.renameTo(file2)) {
+                throw new Exception();
+            }
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private boolean deleteFile(String path) {

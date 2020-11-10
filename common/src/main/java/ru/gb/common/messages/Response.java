@@ -11,6 +11,10 @@ public class Response implements Serializable {
         this.status = status;
     }
 
+    public Response(boolean successFlag) {
+        this.status = successFlag ? Status.Success : Status.Failure;
+    }
+
     public Response() {
     }
 

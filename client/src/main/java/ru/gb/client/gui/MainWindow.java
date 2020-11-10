@@ -5,6 +5,7 @@ import ru.gb.client.Network;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.nio.file.Paths;
 
 class MainWindow extends JFrame {
     private Network network;
@@ -51,8 +52,7 @@ class MainWindow extends JFrame {
         downloadButton.addActionListener(e -> {
             try {
                 String serverPath = filesListBox.getSelectedValue();
-                String[] splittedPath = serverPath.split("/");
-                String fileName = splittedPath[splittedPath.length - 1];
+                String fileName = Paths.get(serverPath).getFileName().toString();
 
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setSelectedFile(new File(fileName));
@@ -69,15 +69,17 @@ class MainWindow extends JFrame {
                 e1.printStackTrace();
             }
         });
-        /*renameButton.addActionListener(e -> {
+        renameButton.addActionListener(e -> {
             try {
-                network.patchFile("", "");
+                String oldName = filesListBox.getSelectedValue();
+                String newName = JOptionPane.showInputDialog(this, "Enter new name for file " + oldName);
+                network.patchFile(oldName, newName);
                 refreshListData();
             } catch (Exception e1) {
                 JOptionPane.showMessageDialog(null, "Server error", "Unable to rename file", JOptionPane.ERROR_MESSAGE);
                 e1.printStackTrace();
             }
-        });*/
+        });
         deleteButton.addActionListener(e -> {
             try {
                 String serverPath = filesListBox.getSelectedValue();

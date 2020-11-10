@@ -19,7 +19,7 @@ public class LoginRequest extends Request {
 
     @Override
     public String toString() {
-        return "DeleteFileRequest{" +
+        return "LoginRequest{" +
                 "login='" + login + '\'' +
                 "password='" + password + '\'' +
                 '}';

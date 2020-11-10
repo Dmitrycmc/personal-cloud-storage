@@ -15,6 +15,7 @@ import ru.gb.common.messages.Package;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Paths;
 
 public class Network {
     private String domain;
@@ -81,8 +82,7 @@ public class Network {
     }
 
     public void getFile(String serverPath) throws Exception {
-        String[] splittedPath = serverPath.split("/");
-        String clientPath = splittedPath[splittedPath.length - 1];
+        String clientPath = Paths.get(serverPath).getFileName().toString();
         getFile(serverPath, "client_storage/" + clientPath);
     }
 

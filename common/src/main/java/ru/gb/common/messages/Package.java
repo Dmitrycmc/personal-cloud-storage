@@ -1,7 +1,6 @@
 package ru.gb.common.messages;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 public class Package implements Serializable {
     private byte[] data;
