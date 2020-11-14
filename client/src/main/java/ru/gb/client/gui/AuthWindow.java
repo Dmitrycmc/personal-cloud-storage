@@ -17,7 +17,7 @@ class AuthWindow extends JFrame {
         if (login.length() > 0 && password.length() > 0) {
             try {
                 network.login(login, password);
-                MainWindow mainWindow = new MainWindow(network);
+                MainWindow mainWindow = new MainWindow(network, this);
                 mainWindow.setTitle("Personal cloud storage [" + login + "]");
                 setVisible(false);
             } catch (UnauthorizedException e) {

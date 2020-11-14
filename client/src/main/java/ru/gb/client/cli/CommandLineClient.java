@@ -46,6 +46,10 @@ public class CommandLineClient {
                 checkArgumentsNumber(args, 2);
                 network.login(args[1], args[2]);
                 break;
+            case LOGOUT:
+                checkArgumentsNumber(args, 0);
+                network.logout();
+                break;
             case HELP:
                 printHelp();
                 break;

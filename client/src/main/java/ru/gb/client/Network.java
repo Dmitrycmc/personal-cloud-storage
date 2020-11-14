@@ -137,15 +137,15 @@ public class Network {
     public void login(String login, String password) throws Exception {
         sendObject(new LoginRequest(login, password));
         Response response = (Response) waitForAnswer();
-        if (response.getStatus() == Status.Unauthorized) {
-            logger.error("Invalid login or password");
-            throw new UnauthorizedException();
-        } else if (response.getStatus() == Status.Failure) {
-            logger.error("Server error");
-            throw new UnauthorizedException();
-        } else {
-            logger.info("You logged in as " + login);
-        }
+        checkErrors(response);
+        logger.info("You logged in as " + login);
+    }
+
+    public void logout() throws Exception {
+        sendObject(new LogoutRequest());
+        Response response = (Response) waitForAnswer();
+        checkErrors(response);
+        logger.info("You logged out!");
     }
 
     public void start() {

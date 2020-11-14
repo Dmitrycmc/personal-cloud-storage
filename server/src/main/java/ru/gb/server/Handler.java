@@ -138,6 +138,10 @@ public class Handler extends ChannelInboundHandlerAdapter {
             send(response);
             return;
         }
+        if (request instanceof LogoutRequest) {
+            logout();
+            send(new Response(true));
+        }
     }
 
     private boolean patchFile(String oldPath, String newPath) {
@@ -180,7 +184,6 @@ public class Handler extends ChannelInboundHandlerAdapter {
     }
 
     private boolean isSignInDataCorrect(String login, String password) {
-        // todo: logout
         // todo: creating users
         JdbcClass db = new JdbcClass(logger);
         try {
@@ -189,6 +192,10 @@ public class Handler extends ChannelInboundHandlerAdapter {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private void logout() {
+        login = null;
     }
 
     @Override

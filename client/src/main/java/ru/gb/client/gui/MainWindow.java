@@ -3,12 +3,15 @@ package ru.gb.client.gui;
 import ru.gb.client.Network;
 
 import javax.swing.*;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import java.awt.*;
 import java.io.File;
 import java.nio.file.Paths;
 
 class MainWindow extends JFrame {
-    private Network network;
+    private final AuthWindow authWindow;
+    private final Network network;
     private JList<String> filesListBox;
     private JPanel buttonsPanel = new JPanel();
     private JButton downloadButton = new JButton("Download");
@@ -16,8 +19,14 @@ class MainWindow extends JFrame {
     private JButton deleteButton = new JButton("Delete");
     private JButton uploadButton = new JButton("Upload");
 
-    MainWindow(Network network) throws HeadlessException {
+    private void notifyServerError(String message) {
+        JOptionPane.showMessageDialog(null, "Server error", message, JOptionPane.ERROR_MESSAGE);
+    }
+
+    MainWindow(Network network, AuthWindow authWindow) throws HeadlessException {
         this.network = network;
+        this.authWindow = authWindow;
+
         setBounds(300, 300, 400, 400);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -26,9 +35,40 @@ class MainWindow extends JFrame {
         addFilesListBox();
         addButtonsPanel();
 
+        addMenu();
+
         refreshListData();
 
         setVisible(true);
+    }
+
+    private void addMenu() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu menuLogout = new JMenu("Logout");
+        MainWindow mainWindow = this;
+        menuLogout.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                int input = JOptionPane.showConfirmDialog(mainWindow,
+                        "Do you really want to logout?", "Logout?",
+                        JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                if (input == JOptionPane.YES_OPTION) {
+                    try {
+                        network.logout();
+                        authWindow.setVisible(true);
+                        mainWindow.setVisible(false);
+                    } catch (Exception e1) {
+                        notifyServerError("Unable to logout");
+                    }
+                }
+            }
+            @Override
+            public void menuDeselected(MenuEvent e) {}
+            @Override
+            public void menuCanceled(MenuEvent e) {}
+        });
+        menuBar.add(menuLogout);
+        add(menuBar, BorderLayout.NORTH);
     }
 
     private void addButtonsPanel() {
@@ -72,7 +112,7 @@ class MainWindow extends JFrame {
                     network.getFile(serverPath, clientPath);
                 }
             } catch (Exception e1) {
-                JOptionPane.showMessageDialog(null, "Server error", "Unable to download file", JOptionPane.ERROR_MESSAGE);
+                notifyServerError("Unable to download file");
                 e1.printStackTrace();
             }
         });
@@ -83,7 +123,7 @@ class MainWindow extends JFrame {
                 network.patchFile(oldName, newName);
                 refreshListData();
             } catch (Exception e1) {
-                JOptionPane.showMessageDialog(null, "Server error", "Unable to rename file", JOptionPane.ERROR_MESSAGE);
+                notifyServerError("Unable to rename file");
                 e1.printStackTrace();
             }
         });
@@ -98,7 +138,7 @@ class MainWindow extends JFrame {
                     refreshListData();
                 }
             } catch (Exception e1) {
-                JOptionPane.showMessageDialog(null, "Server error", "Unable to delete file", JOptionPane.ERROR_MESSAGE);
+                notifyServerError("Unable to delete file");
                 e1.printStackTrace();
             }
         });
@@ -123,7 +163,7 @@ class MainWindow extends JFrame {
                     network.postFile(path);
                     refreshListData();
                 } catch (Exception e1) {
-                    JOptionPane.showMessageDialog(null, "Server error", "Unable to upload file", JOptionPane.ERROR_MESSAGE);
+                    notifyServerError("Unable to upload file");
                     e1.printStackTrace();
                 }
             }
@@ -136,7 +176,7 @@ class MainWindow extends JFrame {
         try {
             filesList = network.getList();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Server error", "Unable to get files list", JOptionPane.ERROR_MESSAGE);
+            notifyServerError("Unable to get files list");
             e.printStackTrace();
         }
         filesListBox.setListData(filesList);

@@ -5,6 +5,7 @@ public enum Commands {
     EXIT(),
 
     LOGIN("login, password"),
+    LOGOUT(),
 
     POST_USER("login, password"),
     PATCH_USER("newLogin"),
