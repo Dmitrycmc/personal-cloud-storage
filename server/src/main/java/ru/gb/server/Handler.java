@@ -14,12 +14,14 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class Handler extends ChannelInboundHandlerAdapter {
     private final Logger logger = LogManager.getLogger(Handler.class);
     private FileOutputStream fos;
 
     private String login = null;
+    private String token = null;
 
     private String getStorageBasePath() {
         return "server_storage/" + login + "/";
@@ -41,10 +43,9 @@ public class Handler extends ChannelInboundHandlerAdapter {
         if (request instanceof LoginRequest) {
             String login = ((LoginRequest) request).getLogin();
             String password = ((LoginRequest) request).getPassword();
-            if (isSignInDataCorrect(login, password)) {
-                this.login = login;
+            if (login(login, password)) {
                 logger.info("Logged in as " + login);
-                response = new Response(Status.Success);
+                response = new LoginResponse(token);
             } else {
                 logger.error("Invalid authorized data");
                 response = new Response(Status.Unauthorized);
@@ -52,13 +53,18 @@ public class Handler extends ChannelInboundHandlerAdapter {
             send(response);
             return;
         }
-        if (login == null) {
+        if (((Request) request).getToken() == null) {
             logger.error("Unauthorized");
             send(new Response(Status.Unauthorized));
             return;
         }
+        if (!((Request) request).getToken().equals(token)) {
+            logger.error("Invalid session token");
+            send(new Response(Status.Unauthorized));
+            return;
+        }
         if (request instanceof GetFileRequest) {
-            FileInputStream fis = null;
+            FileInputStream fis;
             String path = getStorageBasePath() + ((GetFileRequest) request).getPath();
             File f = new File(path);
             long fileSize = f.length();
@@ -183,19 +189,51 @@ public class Handler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private boolean isSignInDataCorrect(String login, String password) {
+    private String generateRandomString(int n) {
+        String AlphaNumericString = "abcdefghijklmnopqrstuvxyz" + "0123456789";
+
+        StringBuilder sb = new StringBuilder(n);
+        for (int i = 0; i < n; i++) {
+
+            int index
+                    = (int) (AlphaNumericString.length()
+                    * Math.random());
+
+            sb.append(AlphaNumericString
+                    .charAt(index));
+        }
+
+        return sb.toString();
+    }
+
+    private String generateToken() {
+        String[] strings = new String[4];
+        for (int i = 0; i < 4; i++) {
+            strings[i] = generateRandomString(4);
+        }
+        return Arrays.stream(strings).collect(Collectors.joining("-"));
+    }
+
+    private boolean login(String login, String password) {
         // todo: creating users
         JdbcClass db = new JdbcClass(logger);
         try {
-            return db.authUser(login, password);
+            if (db.authUser(login, password)) {
+                this.token = generateToken();
+                this.login = login;
+                return true;
+            } else {
+                return false;
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-            return false;
         }
+        return false;
     }
 
     private void logout() {
         login = null;
+        token = null;
     }
 
     @Override

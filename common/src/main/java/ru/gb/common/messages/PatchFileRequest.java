@@ -21,6 +21,7 @@ public class PatchFileRequest extends Request {
         return "PatchFileRequest{" +
                 "oldPath='" + oldPath + '\'' +
                 "newPath='" + newPath + '\'' +
+                "token='" + token + '\'' +
                 '}';
     }
 }

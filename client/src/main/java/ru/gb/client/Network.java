@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 public class Network {
     private String domain;
     private int port;
+    private String token;
     private final Logger logger = LogManager.getLogger(Network.class);
 
     private ObjectDecoderInputStream in;
@@ -59,7 +60,9 @@ public class Network {
     }
 
     public void postFile(String path) throws Exception {
-        sendObject(new PostFileRequest(path));
+        PostFileRequest request = new PostFileRequest(path);
+        request.setToken(token);
+        sendObject(request);
         Response response = (Response) waitForAnswer();
 
         checkErrors(response);
@@ -87,7 +90,9 @@ public class Network {
     }
 
     public void getFile(String serverPath, String clientPath) throws Exception {
-        sendObject(new GetFileRequest(serverPath));
+        GetFileRequest request = new GetFileRequest(serverPath);
+        request.setToken(token);
+        sendObject(request);
 
         Response response = (Response) waitForAnswer();
 
@@ -108,16 +113,19 @@ public class Network {
     }
 
     public String[] getList(String path) throws Exception {
-        sendObject(new GetFilesListRequest(path));
-        GetFilesListResponse response = (GetFilesListResponse) waitForAnswer();
-
+        GetFilesListRequest request = new GetFilesListRequest(path);
+        request.setToken(token);
+        sendObject(request);
+        Response response = (Response) waitForAnswer();
         checkErrors(response);
 
-        return response.getFilesList();
+        return ((GetFilesListResponse) response).getFilesList();
     }
 
     public void deleteFile(String path) throws Exception {
-        sendObject(new DeleteFileRequest(path));
+        DeleteFileRequest request = new DeleteFileRequest(path);
+        request.setToken(token);
+        sendObject(request);
         Response response = (Response) waitForAnswer();
 
         checkErrors(response);
@@ -126,7 +134,9 @@ public class Network {
     }
 
     public void patchFile(String oldPath, String newPath) throws Exception {
-        sendObject(new PatchFileRequest(oldPath, newPath));
+        PatchFileRequest request = new PatchFileRequest(oldPath, newPath);
+        request.setToken(token);
+        sendObject(request);
         Response response = (Response) waitForAnswer();
 
         checkErrors(response);
@@ -135,14 +145,18 @@ public class Network {
     }
 
     public void login(String login, String password) throws Exception {
-        sendObject(new LoginRequest(login, password));
+        LoginRequest request = new LoginRequest(login, password);
+        sendObject(request);
         Response response = (Response) waitForAnswer();
         checkErrors(response);
         logger.info("You logged in as " + login);
+        token = ((LoginResponse)response).getToken();
     }
 
     public void logout() throws Exception {
-        sendObject(new LogoutRequest());
+        LogoutRequest request = new LogoutRequest();
+        request.setToken(token);
+        sendObject(request);
         Response response = (Response) waitForAnswer();
         checkErrors(response);
         logger.info("You logged out!");

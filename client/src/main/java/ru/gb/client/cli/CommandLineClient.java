@@ -41,6 +41,7 @@ public class CommandLineClient {
         if (!matchedCommand.isPresent()) {
             throw new WrongCommandException();
         }
+
         switch (matchedCommand.get()) {
             case LOGIN:
                 checkArgumentsNumber(args, 2);
@@ -117,6 +118,5 @@ public class CommandLineClient {
 // todo: transferring progress
 // todo: sync
 // todo: sharing
-// todo: session token
 // todo: encryption
 // todo: server security

@@ -15,6 +15,7 @@ public class GetFilesListRequest extends Request {
     public String toString() {
         return "GetFilesListRequest{" +
                 "path='" + path + '\'' +
+                "token='" + token + '\'' +
                 '}';
     }
 }
