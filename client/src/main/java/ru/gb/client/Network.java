@@ -72,8 +72,8 @@ public class Network {
         long readBytesCounter = 0;
         FileInputStream fis = new FileInputStream(f);
         do {
-            readBytesCounter += Constants.maxPackageSize;
-            Package pkg = new Package(fis.readNBytes(Constants.maxPackageSize), readBytesCounter >= fileSize);
+            readBytesCounter += Constants.packageSize;
+            Package pkg = new Package(fis.readNBytes(Constants.packageSize), readBytesCounter >= fileSize);
 
             sendObject(pkg);
             response = (Response) waitForAnswer();

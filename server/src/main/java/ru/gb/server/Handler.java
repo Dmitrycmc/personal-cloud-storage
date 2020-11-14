@@ -79,8 +79,8 @@ public class Handler extends ChannelInboundHandlerAdapter {
             }
             try {
                 do {
-                    readBytesCounter += Constants.maxPackageSize;
-                    Package pkg = new Package(fis.readNBytes(Constants.maxPackageSize), readBytesCounter >= fileSize);
+                    readBytesCounter += Constants.packageSize;
+                    Package pkg = new Package(fis.readNBytes(Constants.packageSize), readBytesCounter >= fileSize);
                     send(pkg);
                 } while (readBytesCounter < fileSize);
                 logger.info("File sent: " + path);
