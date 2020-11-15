@@ -41,6 +41,21 @@ public class Handler extends ChannelInboundHandlerAdapter {
         logger.trace("Received from client: " + request);
         Response response;
 
+        if (request instanceof Package) {
+            try {
+                byte[] data = ((Package) request).getData();
+                boolean isTerminate = ((Package) request).isTerminate();
+                fos.write(data);
+                if (isTerminate) {
+                    fos.close();
+                }
+                response = new Response(Status.Success);
+            } catch (IOException e) {
+                response = new Response(Status.Failure);
+            }
+            send(response);
+            return;
+        }
         if (request instanceof CreateUserRequest) {
             String login = ((CreateUserRequest) request).getLogin();
             String password = ((CreateUserRequest) request).getPassword();
@@ -113,21 +128,6 @@ public class Handler extends ChannelInboundHandlerAdapter {
             String fileName = ((PostFileRequest) request).getFileName();
             try {
                 fos = new FileOutputStream(getStorageBasePath() + fileName);
-                response = new Response(Status.Success);
-            } catch (IOException e) {
-                response = new Response(Status.Failure);
-            }
-            send(response);
-            return;
-        }
-        if (request instanceof Package) {
-            try {
-                byte[] data = ((Package) request).getData();
-                boolean isTerminate = ((Package) request).isTerminate();
-                fos.write(data);
-                if (isTerminate) {
-                    fos.close();
-                }
                 response = new Response(Status.Success);
             } catch (IOException e) {
                 response = new Response(Status.Failure);
