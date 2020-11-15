@@ -66,12 +66,14 @@ public class JdbcClass implements Closeable {
         Class.forName("org.sqlite.JDBC");
         connection = DriverManager.getConnection("jdbc:sqlite:personal-cloud-storage.db");
         statement = connection.createStatement();
+        logger.trace("DB connected.");
     }
 
     @Override
     public void close() {
         try {
             connection.close();
+            logger.trace("DB connection is closed.");
         } catch (SQLException e) {
             e.printStackTrace();
         }

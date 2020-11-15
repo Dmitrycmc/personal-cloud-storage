@@ -1,8 +1,8 @@
 package ru.gb.common.messages;
 
 public class LoginRequest extends Request {
-    private String login;
-    private String password;
+    protected String login;
+    protected String password;
 
     public LoginRequest(String login, String password) {
         this.login = login;
@@ -21,7 +21,7 @@ public class LoginRequest extends Request {
     public String toString() {
         return "LoginRequest{" +
                 "login='" + login + '\'' +
-                "password='" + password + '\'' +
+                ", password='" + password + '\'' +
                 '}';
     }
 }

@@ -18,7 +18,7 @@ public class LoginResponse extends Response{
     public String toString() {
         return "LoginResponse{" +
                 ", status=" + status +
-                "token='" + token + '\'' +
+                ", token='" + token + '\'' +
                 '}';
     }
 }

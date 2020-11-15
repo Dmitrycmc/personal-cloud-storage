@@ -31,7 +31,7 @@ public class Network {
         this.port = port;
     }
 
-    private void sendObject(Object obj) throws IOException {
+    private void send(Object obj) throws IOException {
         logger.trace("Sent to server: " + obj);
         out.writeObject(obj);
     }
@@ -62,7 +62,7 @@ public class Network {
     public void postFile(String path) throws Exception {
         PostFileRequest request = new PostFileRequest(path);
         request.setToken(token);
-        sendObject(request);
+        send(request);
         Response response = (Response) waitForAnswer();
 
         checkErrors(response);
@@ -75,7 +75,7 @@ public class Network {
             readBytesCounter += Constants.packageSize;
             Package pkg = new Package(fis.readNBytes(Constants.packageSize), readBytesCounter >= fileSize);
 
-            sendObject(pkg);
+            send(pkg);
             response = (Response) waitForAnswer();
 
             checkErrors(response);
@@ -92,7 +92,7 @@ public class Network {
     public void getFile(String serverPath, String clientPath) throws Exception {
         GetFileRequest request = new GetFileRequest(serverPath);
         request.setToken(token);
-        sendObject(request);
+        send(request);
 
         Response response = (Response) waitForAnswer();
 
@@ -115,7 +115,7 @@ public class Network {
     public String[] getList(String path) throws Exception {
         GetFilesListRequest request = new GetFilesListRequest(path);
         request.setToken(token);
-        sendObject(request);
+        send(request);
         Response response = (Response) waitForAnswer();
         checkErrors(response);
 
@@ -125,7 +125,7 @@ public class Network {
     public void deleteFile(String path) throws Exception {
         DeleteFileRequest request = new DeleteFileRequest(path);
         request.setToken(token);
-        sendObject(request);
+        send(request);
         Response response = (Response) waitForAnswer();
 
         checkErrors(response);
@@ -136,7 +136,7 @@ public class Network {
     public void patchFile(String oldPath, String newPath) throws Exception {
         PatchFileRequest request = new PatchFileRequest(oldPath, newPath);
         request.setToken(token);
-        sendObject(request);
+        send(request);
         Response response = (Response) waitForAnswer();
 
         checkErrors(response);
@@ -146,17 +146,26 @@ public class Network {
 
     public void login(String login, String password) throws Exception {
         LoginRequest request = new LoginRequest(login, password);
-        sendObject(request);
+        send(request);
         Response response = (Response) waitForAnswer();
         checkErrors(response);
         logger.info("You logged in as " + login);
         token = ((LoginResponse)response).getToken();
     }
 
+    public void createUser(String login, String password) throws Exception {
+        CreateUserRequest request = new CreateUserRequest(login, password);
+        send(request);
+        Response response = (Response) waitForAnswer();
+        checkErrors(response);
+        logger.info("Created account: " + login);
+        token = ((LoginResponse)response).getToken();
+    }
+
     public void logout() throws Exception {
         LogoutRequest request = new LogoutRequest();
         request.setToken(token);
-        sendObject(request);
+        send(request);
         Response response = (Response) waitForAnswer();
         checkErrors(response);
         logger.info("You logged out!");

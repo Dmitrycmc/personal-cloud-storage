@@ -17,7 +17,7 @@ public class PostFileRequest extends Request {
     public String toString() {
         return "PostFileRequest{" +
                 "fileName='" + fileName + '\'' +
-                "token='" + token + '\'' +
+                ", token='" + token + '\'' +
                 '}';
     }
 }

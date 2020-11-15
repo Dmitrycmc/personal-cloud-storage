@@ -20,8 +20,8 @@ public class PatchFileRequest extends Request {
     public String toString() {
         return "PatchFileRequest{" +
                 "oldPath='" + oldPath + '\'' +
-                "newPath='" + newPath + '\'' +
-                "token='" + token + '\'' +
+                ", newPath='" + newPath + '\'' +
+                ", token='" + token + '\'' +
                 '}';
     }
 }

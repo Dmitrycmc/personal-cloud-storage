@@ -15,7 +15,7 @@ public class DeleteFileRequest extends Request {
     public String toString() {
         return "DeleteFileRequest{" +
                 "path='" + path + '\'' +
-                "token='" + token + '\'' +
+                ", token='" + token + '\'' +
                 '}';
     }
 }

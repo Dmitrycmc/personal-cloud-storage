@@ -11,6 +11,7 @@ import ru.gb.common.messages.Package;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -40,6 +41,18 @@ public class Handler extends ChannelInboundHandlerAdapter {
         logger.trace("Received from client: " + request);
         Response response;
 
+        if (request instanceof CreateUserRequest) {
+            String login = ((CreateUserRequest) request).getLogin();
+            String password = ((CreateUserRequest) request).getPassword();
+            if (createUser(login, password)) {
+                response = new LoginResponse(token);
+            } else {
+                logger.error("Error");
+                response = new Response(Status.Failure);
+            }
+            send(response);
+            return;
+        }
         if (request instanceof LoginRequest) {
             String login = ((LoginRequest) request).getLogin();
             String password = ((LoginRequest) request).getPassword();
@@ -214,10 +227,25 @@ public class Handler extends ChannelInboundHandlerAdapter {
         return Arrays.stream(strings).collect(Collectors.joining("-"));
     }
 
+    private boolean createUser(String login, String password) {
+        try (JdbcClass db = new JdbcClass(logger)) {
+            Path path = Paths.get("server_storage/" + login);
+            Files.createDirectories(path);
+            logger.info("Directory " + "server_storage/" + login + " is created!");
+
+            db.insertUser(login, password);
+            logger.info("User " + login + " is created!");
+            this.token = generateToken();
+            this.login = login;
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     private boolean login(String login, String password) {
-        // todo: creating users
-        JdbcClass db = new JdbcClass(logger);
-        try {
+        try (JdbcClass db = new JdbcClass(logger)) {
             if (db.authUser(login, password)) {
                 this.token = generateToken();
                 this.login = login;
