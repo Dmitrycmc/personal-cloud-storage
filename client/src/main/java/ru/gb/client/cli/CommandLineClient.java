@@ -51,6 +51,10 @@ public class CommandLineClient {
                 checkArgumentsNumber(args, 0);
                 network.logout();
                 break;
+            case POST_USER:
+                checkArgumentsNumber(args, 2);
+                network.createUser(args[1], args[2]);
+                break;
             case HELP:
                 printHelp();
                 break;
@@ -90,7 +94,7 @@ public class CommandLineClient {
         greetings();
         Scanner scanner = new Scanner(System.in);
         while (true) {
-            System.out.println("\nEnter command:");
+            System.out.println("\nEnter command [" + network.getLogin() + "]:");
             String line = scanner.nextLine();
             if (line.equalsIgnoreCase(Commands.EXIT.toString())) {
                 break;

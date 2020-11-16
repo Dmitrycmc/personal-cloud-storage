@@ -18,9 +18,17 @@ import java.net.Socket;
 import java.nio.file.Paths;
 
 public class Network {
+    private final String UNAUTHORIZED = "-";
+
     private String domain;
     private int port;
-    private String token;
+    private String token = null;
+    private String login = UNAUTHORIZED;
+
+    public String getLogin() {
+        return login;
+    }
+
     private final Logger logger = LogManager.getLogger(Network.class);
 
     private ObjectDecoderInputStream in;
@@ -151,6 +159,7 @@ public class Network {
         checkErrors(response);
         logger.info("You logged in as " + login);
         token = ((LoginResponse)response).getToken();
+        this.login = login;
     }
 
     public void createUser(String login, String password) throws Exception {
@@ -160,6 +169,7 @@ public class Network {
         checkErrors(response);
         logger.info("Created account: " + login);
         token = ((LoginResponse)response).getToken();
+        this.login = login;
     }
 
     public void logout() throws Exception {
@@ -169,6 +179,8 @@ public class Network {
         Response response = (Response) waitForAnswer();
         checkErrors(response);
         logger.info("You logged out!");
+        this.login = UNAUTHORIZED;
+        this.token = null;
     }
 
     public void start() {
